@@ -231,7 +231,7 @@ export default function AboutPage() {
 
         <Figure
           slot="session-in-progress"
-          caption="A session in progress"
+          caption="How sessions run"
           className="mt-14"
         />
       </Section>

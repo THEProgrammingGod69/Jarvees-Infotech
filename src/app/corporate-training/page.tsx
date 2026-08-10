@@ -145,7 +145,7 @@ export default function CorporateTrainingPage() {
 
         <Figure
           slot="corporate-session"
-          caption="On-site delivery"
+          caption="Delivery formats"
           className="mt-12"
         />
 

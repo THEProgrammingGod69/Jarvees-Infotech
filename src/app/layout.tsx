@@ -3,6 +3,7 @@ import { Archivo, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 import Header from "@/components/Header";
+import { ScrollProgress } from "@/components/motion";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import { organisationSchema, centreSchemas } from "@/lib/jsonld";
@@ -105,7 +106,11 @@ export default function RootLayout({
       lang="en-IN"
       className={`${archivo.variable} ${publicSans.variable} ${plexMono.variable}`}
     >
-      <body>
+      {/* `grain` puts a fixed film-grain layer over the whole viewport. It is
+          the cheapest thing on the site that stops flat dark planes reading as
+          printed rather than lit. */}
+      <body className="grain">
+        <ScrollProgress />
         {/* Organisation and both centres are described once, at the root, so
             every page carries them. Course schema is added per course page. */}
         <JsonLd id="schema-organisation" data={organisationSchema()} />

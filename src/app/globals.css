@@ -93,8 +93,18 @@
 
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast: 140ms;
   --duration-base: 320ms;
+  --duration-slow: 620ms;
+
+  /* --- Depth ---------------------------------------------------------------
+     Elevation is still luminance, not drop shadow. What these add is *glow* —
+     light emitted by the accent rather than a shadow cast by a card. That is
+     the difference between a page that looks lit and one that looks stacked. */
+  --glow-signal: 0 0 0 1px color-mix(in oklab, var(--color-signal) 30%, transparent),
+    0 0 24px -4px color-mix(in oklab, var(--color-signal) 45%, transparent);
+  --glow-soft: 0 0 60px -12px color-mix(in oklab, var(--color-signal) 30%, transparent);
 }
 
 /* ==========================================================================
@@ -163,6 +173,136 @@
   /* Numerals in data contexts must align in columns. */
   .tnum {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ==========================================================================
+   Surface effects
+
+   The concept is still the engineered system landscape; these give it depth
+   and light without reaching for glassmorphism or a drop shadow. Everything
+   here is decorative and sits behind content with `pointer-events: none`.
+   ========================================================================== */
+
+/* Film grain. A single tiled SVG turbulence, fixed to the viewport so it never
+   scrolls with content — the texture reads as the screen, not the page. This
+   is the cheapest thing on the site that makes flat dark planes look
+   photographic rather than printed. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The blueprint grid that sits under dark sections. Two layers at different
+   scales, like a drafting sheet's minor and major divisions. */
+@utility blueprint {
+  background-image:
+    linear-gradient(to right, var(--color-hairline) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-hairline) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+/* A hairline that fades out at both ends rather than stopping dead. Used for
+   section rules — it is a small thing that reads as considered. */
+@utility rule-fade {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-hairline) 15%,
+    var(--color-hairline) 85%,
+    transparent
+  );
+}
+
+/* Text that carries a vertical light fall-off, as if lit from above. */
+@utility text-lit {
+  background: linear-gradient(
+    180deg,
+    var(--color-chalk) 0%,
+    color-mix(in oklab, var(--color-chalk) 72%, var(--color-steel)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ==========================================================================
+   Keyframes for the ambient layer
+   ========================================================================== */
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(3%, -4%, 0) scale(1.06);
+  }
+  66% {
+    transform: translate3d(-3%, 3%, 0) scale(0.97);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* A packet of light travelling along an integration edge on the module map. */
+@keyframes packet {
+  from {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  to {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* Edges draw themselves along their own length. `pathLength="100"` on the path
+   normalises every edge to 100 units, so one keyframe draws any geometry. */
+@keyframes edge-draw {
+  from {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* A short bright segment running the length of an integration edge. */
+@keyframes packet-run {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(220%);
   }
 }
 
@@ -252,6 +392,15 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes word-rise {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 

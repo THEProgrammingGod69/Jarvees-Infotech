@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import Section, { Shell, SectionHeading } from "@/components/Section";
-import Reveal from "@/components/Reveal";
+import { Reveal } from "@/components/motion";
 import JsonLd from "@/components/JsonLd";
 import { Cta, MonoLabel } from "@/components/ui";
 import { breadcrumbSchema } from "@/lib/jsonld";

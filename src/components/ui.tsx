@@ -23,17 +23,31 @@ export function Cta({
   className?: string;
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-mono-label uppercase transition-colors duration-(--duration-fast)";
+    "group/cta relative isolate inline-flex items-center justify-center gap-2 overflow-hidden px-5 py-3 font-mono text-mono-label uppercase transition-all duration-(--duration-base)";
 
   const styles =
     variant === "primary"
-      ? "bg-signal text-ink hover:bg-signal/85"
+      ? "bg-signal text-ink hover:brightness-110"
       : tone === "paper"
         ? "border border-paper-line text-ink hover:bg-paper-alt"
-        : "border border-hairline text-chalk hover:border-steel-dim hover:bg-graphite";
+        : "border border-hairline text-chalk hover:border-signal/50 hover:bg-graphite";
+
+  // Outline buttons on the dark plane pick up a faint amber glow on hover, so
+  // the secondary action still feels lit without spending any of the amber
+  // budget on a fill.
+  const glow =
+    variant === "line" && tone === "ink"
+      ? "hover:[box-shadow:var(--glow-soft)]"
+      : "";
 
   return (
-    <Link href={href} className={`${base} ${styles} ${className}`}>
+    <Link href={href} className={`${base} ${styles} ${glow} ${className}`}>
+      {/* A band of light sweeps across on hover. Motion-safe only, and it sits
+          behind the label so it can never affect legibility. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 motion-safe:group-hover/cta:translate-x-full"
+      />
       {children}
     </Link>
   );

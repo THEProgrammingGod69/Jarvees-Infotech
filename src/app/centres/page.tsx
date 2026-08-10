@@ -139,7 +139,7 @@ export default function CentresPage() {
                   the whole site — it is what someone uses to find the door. */}
               <Figure
                 slot={`${centre.id}-entrance` as ImageSlotId}
-                caption={`Entrance — ${centre.name}`}
+                caption={`${centre.name} · ${centre.locality} ${centre.postalCode}`}
                 className="mb-8"
               />
 
