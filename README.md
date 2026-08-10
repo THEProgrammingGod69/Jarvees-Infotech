@@ -56,6 +56,17 @@ truth, and the structured data reads from the same constants as the visible
 page — so updating the rating there updates the footer and the
 `AggregateRating` schema together, and they cannot drift apart.
 
+### Adding a photograph
+
+The site ships no photographs. Every image is a **slot** declared in
+`src/content/images.ts` with its dimensions fixed up front; until a slot has a
+file it renders an on-brand drafting plate at exactly the right size. To supply
+one, drop the file in `public/` and set `src` on the matching slot. Nothing else
+changes, and because the box was already the right shape, adding the photograph
+cannot shift the page.
+
+Alt text is written on the slot, so it can never be left as a filename.
+
 ### Changing the module map
 
 `src/content/landscape.ts` holds the nodes and the integration edges behind the
@@ -146,6 +157,11 @@ The Next hook would opt the route out of static generation, and a dynamically
 rendered page streams its metadata into the body instead of the head — measured,
 and it cost the page its meta description.
 
+**Open Graph cards are generated, not designed by hand.** Every page produces
+its own at build. Course cards read the landscape data, so an SAP course's card
+lists the modules it genuinely integrates with — the same true thing the map on
+the home page shows.
+
 **The claims discipline is a compliance boundary, not a tone.** No placement
 guarantee, no SAP partnership claim, no invented statistics, no unverifiable
 testimonials. `CONTENT-TODO.md` §5 lists what is deliberately absent. Please
@@ -160,7 +176,7 @@ Measured against a production build, all nine routes:
 | | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
 | Desktop | 100 | 100 | 100 | 100 |
-| Mobile | 95–97 | 100 | 100 | 100 |
+| Mobile | 96–99 | 100 | 100 | 100 |
 
 Cumulative layout shift is 0 (≤0.03 on the two routes with embedded maps). No
 horizontal overflow at 320, 375, 768, 1024 or 1440px. `prefers-reduced-motion:

@@ -52,23 +52,52 @@ grep -rn "{{" src/content/courses/
 
 ## 2. Images the academy must supply
 
-The site currently ships **no photographs at all**. This is deliberate: stock
-images of unrelated people in an unrelated office are worse than none, and
-third-party photographs were not scraped or reused. Every image below is
-optional — the site is complete and launchable without them — but each one
-would earn its place.
+The site ships **no photographs**. This is deliberate: stock images of unrelated
+people in an unrelated office are worse than none, and no third-party
+photographs were scraped or reused.
 
-| Where | What is needed | Notes |
-|---|---|---|
-| `/centres` | 2–4 photographs of each centre: the entrance from the street, the classroom, the building frontage | The street-level entrance shot is the most valuable single image on the site — it is what a first-time visitor uses to find the door. Landscape, at least 1600px wide. |
-| `/about` | One photograph of a session in progress | Real learners at real machines. Get written consent from anyone identifiable. |
-| `/corporate-training` | One photograph of an on-site corporate session | Check the client's permission before publishing anything showing their premises or staff. |
-| Open Graph card | Optional replacement for the generated card | A card is generated automatically at `src/app/opengraph-image.tsx` and needs nothing. Replace only if the academy has a designed one. |
-| Favicon | Optional replacement | Currently the schematic mark at `src/app/icon.svg`. |
+Every image is declared as a **slot** in `src/content/images.ts`, with its
+dimensions fixed up front. Until a slot has a file it renders an on-brand
+drafting plate at exactly the right size, so the site is complete and
+launchable today — and supplying a photograph later **cannot shift the page**,
+because the box is already the right shape.
 
-**Do not** add: stock photography of generic offices or models, screenshots of
-SAP software (SAP's interface is SAP's copyright), or logos of any company
-presented as a hiring or training partner.
+### Supplying one
+
+```
+1. Put the file in public/     e.g. public/centres/narhe-entrance.jpg
+2. Open src/content/images.ts and set src on the matching slot:
+      src: "/centres/narhe-entrance.jpg",
+3. Check the file's aspect ratio matches the width/height already on the slot.
+```
+
+That is the whole job — no other file changes.
+
+### The four slots
+
+| Slot | Appears on | What to photograph | Shape |
+|---|---|---|---|
+| `narhe-entrance` | `/centres` | **The street entrance at Narhe**, as a first-time visitor sees it walking up. This is the single highest-value image on the site — it is what someone uses to find the door. | 16:10 landscape, ≥1600px wide |
+| `tilak-road-entrance` | `/centres` | The frontage at Mangal Murti Complex, Hirabaug Chowk | 16:10 landscape, ≥1600px wide |
+| `session-in-progress` | `/about` | A real session — learners at their own machines, not an empty room and not a posed group shot. **Written consent needed from anyone identifiable.** | 16:9 landscape, ≥1600px wide |
+| `corporate-session` | `/corporate-training` | An on-site corporate session. **Clear this with the client** before publishing anything showing their premises or staff. | 16:9 landscape, ≥1600px wide |
+
+Alt text for all four is already written in `src/content/images.ts`, so it can
+never be left as a filename. Adjust it if the photograph shows something
+different from what was described.
+
+### Do not add
+
+Stock photography of generic offices or models; screenshots of SAP software
+(SAP's interface is SAP's copyright); or the logo of any company presented as a
+hiring or training partner.
+
+### Social sharing cards
+
+Nothing needed. Every page generates its own Open Graph and Twitter card at
+build. Course cards carry the course name, its module code and — for SAP
+modules — the modules it genuinely integrates with, read from the same
+landscape data that draws the map on the home page.
 
 ---
 
