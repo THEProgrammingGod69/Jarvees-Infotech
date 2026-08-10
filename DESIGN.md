@@ -423,3 +423,87 @@ The three-per-page budget is the whole thing holding that in place.
 - Real photography of both centres, particularly the street-level entrance shots — the single highest-value images the site could gain.
 - Fees and batch dates, which would let the 30 `{{TOKEN}}` placeholders go and remove the only visible "to be confirmed" text on the site.
 - A trainer page, if the academy is willing to publish named profiles. It is the strongest available proof and the site currently has to promise it "on request".
+
+
+---
+
+## 9. Revision — the animated rebuild
+
+The first build was reviewed by the client as *"very very basic"*, against a
+brief that asked for premium, extensive and animated. That judgement is
+accepted: §3 of this plan read "engineered restraint" as a licence to remove,
+and the result was correct, quiet, and underwhelming. Restraint is a means to
+emphasis, not a substitute for it. A page with nothing to look at is not
+disciplined — it is unfinished.
+
+What changed, and what deliberately did not.
+
+### The concept did not change
+
+Still the system landscape. Still amber on blue-black, still the mono data
+register, still the gutter rail, still no drop shadow. The rebuild adds
+*depth and light* to that language rather than replacing it, so the site is
+richer without becoming any other institute's site.
+
+### What was added
+
+**A visual layer** (`src/components/visual/Ambient.tsx`) — drifting aurora
+light with amber against a cool counter-light so dark planes are lit from two
+sides; a drafting grid masked to dissolve at its edges; fixed film grain over
+the viewport; corner registration marks; hairlines that fade out rather than
+stopping dead.
+
+**Glow, not shadow.** The no-shadow rule survives, and the distinction is the
+point: elevation is still luminance, but the accent now *emits* light. A card
+is lit, never stacked.
+
+**A motion library** (`src/components/motion/`) — reveals, stagger groups,
+masked word-rise headlines, counters, terminal-style label decoding,
+cursor spotlights, magnetic controls, parallax, a scroll-progress rail and a
+marquee.
+
+**The module map became alive.** Edges draw themselves along their own length
+and a packet of light runs each integration touching the active module. The
+motion is doing the teaching: the eye is pulled along exactly the relationship
+being described.
+
+**More content**, because "extensive" was a fair criticism too: an FAQ with
+`FAQPage` structured data, a figures band, a course marquee, and a six-point
+differentiators grid.
+
+### Three rules the motion had to obey
+
+**1. Nothing above the fold may depend on JavaScript.** The scroll-reveal
+components start their subject at `opacity: 0` and wait for hydration plus a
+viewport observer. Used in the hero, that measured as a **3.2s
+largest-contentful-paint render delay** on a throttled phone — the headline
+paragraph sat invisible waiting for a script. The hero now uses CSS-only
+equivalents (`motion/Rise.tsx`) that start at first paint and ship no client
+JavaScript at all. Mobile home went 87 → 96 on that change alone.
+
+**2. Motion must not animate through a false claim.** A counter run at a 4.5
+rating displays "4.4 / 5" for most of a second. An almost-right rating is a
+wrong claim, briefly, and briefly is enough. Ratings are now *stated*, and
+`RatingBar` carries the motion instead — a partially-drawn bar reads as "still
+drawing", where a wrong number just reads as a wrong number. Counters are
+pointed only at quantities, and each reserves its final width so "0" growing
+to "2015" cannot shove the layout.
+
+**3. Reduced motion must land on the finished state.** Every primitive answers
+`useReducedMotion` first and returns the completed element, never the initial
+frame. Verified: with the query set, zero elements animate and zero content is
+left below full opacity.
+
+### Measured cost
+
+Desktop 99–100 and mobile 95–99 on performance; 100 on accessibility, best
+practices and SEO across all nine routes. Home cumulative layout shift went
+0.041 → 0.002 after fixing the map's nodes, which were content-sized and so
+resized about their own centres whenever a web font swapped in.
+
+### Still absent, still on purpose
+
+None of the claims discipline moved. No invented statistic gained a counter,
+no testimonial gained a face, and the FAQ answers the unprofitable questions —
+no job guarantee, no SAP partnership, what ISO 9001 does and does not certify —
+in the plainest words available.

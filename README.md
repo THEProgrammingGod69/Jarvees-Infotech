@@ -143,6 +143,17 @@ colour.
 **Amber is never text on the light plane.** It measures 1.54:1 on `--color-paper`.
 On `/courses` it may only appear as a fill with ink text on top.
 
+**Nothing above the fold may depend on JavaScript.** Hero entrances use the
+CSS-only primitives in `src/components/motion/Rise.tsx`, not the Framer Motion
+ones. The JS reveals start at `opacity: 0` and wait for hydration plus a
+viewport observer, which cost 3.2s of largest-contentful-paint render delay on
+a throttled phone. Use `Reveal`/`Headline` below the fold; use `Rise`/`RiseText`
+above it.
+
+**Counters point only at quantities, never at ratings.** A counter run at 4.5
+shows "4.4 / 5" for most of a second, and an almost-right rating is a wrong
+claim. Ratings are stated; `RatingBar` supplies the motion.
+
 **The amber budget is three elements per page.** Primary CTA, active map node,
 current-section marker. Amber at more than about 5% coverage stops reading as
 premium and starts reading as a warning state.
@@ -175,8 +186,8 @@ Measured against a production build, all nine routes:
 
 | | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
-| Desktop | 100 | 100 | 100 | 100 |
-| Mobile | 96–99 | 100 | 100 | 100 |
+| Desktop | 99–100 | 100 | 100 | 100 |
+| Mobile | 95–99 | 100 | 100 | 100 |
 
 Cumulative layout shift is 0 (≤0.03 on the two routes with embedded maps). No
 horizontal overflow at 320, 375, 768, 1024 or 1440px. `prefers-reduced-motion:
