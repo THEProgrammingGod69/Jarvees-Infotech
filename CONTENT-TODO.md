@@ -57,10 +57,24 @@ people in an unrelated office are worse than none, and no third-party
 photographs were scraped or reused.
 
 Every image is declared as a **slot** in `src/content/images.ts`, with its
-dimensions fixed up front. Until a slot has a file it renders an on-brand
-drafting plate at exactly the right size, so the site is complete and
-launchable today — and supplying a photograph later **cannot shift the page**,
-because the box is already the right shape.
+dimensions fixed up front. Until a slot has a file it renders **finished
+abstract artwork** at exactly the right size — a layered composition in the
+site's own visual language: drifting light, a drafting grid, a schematic
+figure, fine scan lines.
+
+That is a deliberate choice over a "photo pending" notice. A page carrying
+grey boxes labelled *to be supplied* reads as unfinished; the same page
+carrying compositions that belong to the design reads as designed. The site is
+complete and launchable today, and supplying a photograph later **cannot shift
+the page**, because the box is already the right shape.
+
+Nothing on screen tells a visitor an image is missing. The outstanding
+photographs are tracked here and in a `data-image-slot` attribute on the
+element, so a developer can find every one of them with:
+
+```bash
+grep -rn "data-image-slot" .next/server/app   # after a build
+```
 
 ### Supplying one
 
