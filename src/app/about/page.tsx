@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Section, { Shell, SectionHeading } from "@/components/Section";
 import JsonLd from "@/components/JsonLd";
 import { Cta, MonoLabel } from "@/components/ui";
+import Figure from "@/components/Figure";
 import { breadcrumbSchema } from "@/lib/jsonld";
 import { site, centres, proofPoints } from "@/lib/site";
 
@@ -227,6 +228,12 @@ export default function AboutPage() {
             </p>
           </div>
         </div>
+
+        <Figure
+          slot="session-in-progress"
+          caption="A session in progress"
+          className="mt-14"
+        />
       </Section>
 
       <Section index="06" label="Who it is for">

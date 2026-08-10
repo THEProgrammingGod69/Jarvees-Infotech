@@ -4,6 +4,7 @@ import EnquiryForm from "@/components/EnquiryForm";
 import Section, { Shell, SectionHeading } from "@/components/Section";
 import JsonLd from "@/components/JsonLd";
 import { Cta, MonoLabel } from "@/components/ui";
+import Figure from "@/components/Figure";
 import { breadcrumbSchema } from "@/lib/jsonld";
 import { site, centres } from "@/lib/site";
 import { tracks } from "@/content/types";
@@ -142,7 +143,13 @@ export default function CorporateTrainingPage() {
           ))}
         </div>
 
-        <div className="mt-px grid gap-px bg-hairline lg:grid-cols-2">
+        <Figure
+          slot="corporate-session"
+          caption="On-site delivery"
+          className="mt-12"
+        />
+
+        <div className="mt-12 grid gap-px bg-hairline lg:grid-cols-2">
           <div className="bg-graphite p-6 sm:p-8">
             <MonoLabel>Cohort size</MonoLabel>
             <p className="mt-4 text-body-s text-steel">

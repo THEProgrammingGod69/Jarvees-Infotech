@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Section, { Shell, SectionHeading } from "@/components/Section";
 import JsonLd from "@/components/JsonLd";
 import { Cta, MonoLabel } from "@/components/ui";
+import Figure from "@/components/Figure";
+import type { ImageSlotId } from "@/content/images";
 import { breadcrumbSchema } from "@/lib/jsonld";
 import { site, centres, mapsUrl, mapsEmbedUrl, fullAddress } from "@/lib/site";
 
@@ -133,6 +135,14 @@ export default function CentresPage() {
             </div>
 
             <div className="lg:col-span-7">
+              {/* The street-level entrance shot is the highest-value image on
+                  the whole site — it is what someone uses to find the door. */}
+              <Figure
+                slot={`${centre.id}-entrance` as ImageSlotId}
+                caption={`Entrance — ${centre.name}`}
+                className="mb-8"
+              />
+
               <div className="border border-hairline">
                 <div className="flex items-center justify-between gap-4 border-b border-hairline px-4 py-3">
                   <p className="font-mono text-mono-label uppercase text-steel">
