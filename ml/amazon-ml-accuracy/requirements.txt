@@ -1,0 +1,8 @@
+# Versions this folder was developed and tested against (Python 3.11).
+# They match the libraries the competition repo already pins - nothing new is introduced.
+numpy==2.4.6
+pandas==3.0.6
+pyarrow==25.0.1
+lightgbm==4.7.0
+rapidfuzz==3.14.6
+pytest==9.1.1
