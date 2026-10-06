@@ -1,7 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Course, Module } from "@/content/curriculum";
 
 const kindLabel: Record<Course["kind"], string> = {
@@ -22,13 +21,48 @@ const kindTone: Record<Course["kind"], string> = {
 
 /**
  * The curriculum drawn as a network: each module is a layer, each course a
- * neuron. Selecting a layer lights it and sends signal along every synapse
- * feeding it; the course list beside it is the readable, accessible version
- * of the same data. Tabs follow the WAI-ARIA tabs pattern (arrow keys move).
+ * neuron. Selecting a layer lights it and fires a burst of signal along
+ * every synapse into and out of it (a few pulses, then it rests — a
+ * hundred dashes flowing forever would repaint the diagram every frame);
+ * the course list beside it is the readable, accessible version of the
+ * same data. Tabs follow the WAI-ARIA tabs pattern (arrow keys move).
  */
 export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
   const [active, setActive] = useState(1);
   const current = modules[active]!;
+  const tablistRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLSpanElement>(null);
+
+  // The selected-tab pill: one element, moved with a transform.
+  useLayoutEffect(() => {
+    const list = tablistRef.current;
+    const pill = pillRef.current;
+    const tab = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!list || !pill || !tab) return;
+    const first = pill.style.opacity !== "1";
+    pill.style.transition = first ? "none" : "";
+    pill.style.width = `${tab.offsetWidth}px`;
+    pill.style.transform = `translate3d(${tab.offsetLeft}px, 0, 0)`;
+    pill.style.opacity = "1";
+    list.dataset.pill = "on";
+    if (!first) tab.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }, [active]);
+
+  // Re-measure when fonts load or the layout changes width.
+  useEffect(() => {
+    const list = tablistRef.current;
+    const pill = pillRef.current;
+    if (!list || !pill) return;
+    const ro = new ResizeObserver(() => {
+      const tab = list.querySelector<HTMLElement>('[aria-selected="true"]');
+      if (!tab) return;
+      pill.style.transition = "none";
+      pill.style.width = `${tab.offsetWidth}px`;
+      pill.style.transform = `translate3d(${tab.offsetLeft}px, 0, 0)`;
+    });
+    ro.observe(list);
+    return () => ro.disconnect();
+  }, []);
 
   const W = 640;
   const H = 360;
@@ -39,6 +73,21 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
     );
     return { nodes };
   }, [modules]);
+
+  const synapses = useMemo(() => {
+    let rest = "";
+    const live = ["", "", "", "", ""];
+    layout.nodes.slice(0, -1).forEach((col, i) =>
+      col.forEach((a, ai) =>
+        layout.nodes[i + 1]!.forEach((b, bi) => {
+          const seg = `M${a.x} ${a.y}L${b.x} ${b.y}`;
+          if (i + 1 === active || i === active) live[(ai + bi) % 5] += seg;
+          else rest += seg;
+        }),
+      ),
+    );
+    return { rest, live: live.filter(Boolean) };
+  }, [layout, active]);
 
   const onKey = (e: React.KeyboardEvent, i: number) => {
     let next = i;
@@ -54,7 +103,17 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
 
   return (
     <div className="holo overflow-hidden p-4 sm:p-6">
-      <div role="tablist" aria-label="Modules" className="no-scrollbar flex gap-1 overflow-x-auto rounded-full border border-line bg-void/50 p-1">
+      <div
+        ref={tablistRef}
+        role="tablist"
+        aria-label="Modules"
+        className="no-scrollbar relative flex gap-1 overflow-x-auto rounded-full border border-line bg-void/50 p-1"
+      >
+        <span
+          ref={pillRef}
+          aria-hidden="true"
+          className="tab-pill pointer-events-none absolute top-1 bottom-1 left-0 rounded-full bg-cyan opacity-0"
+        />
         {modules.map((m, i) => {
           const selected = i === active;
           return (
@@ -69,16 +128,10 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
               className={`relative shrink-0 rounded-full px-4 py-2.5 text-small font-medium whitespace-nowrap transition-colors ${
-                selected ? "text-void" : "text-haze hover:text-frost"
+                // Until the moving pill is measured (and without JavaScript) the tab paints its own fill.
+                selected ? "bg-cyan text-void [[data-pill=on]_&]:bg-transparent" : "text-haze hover:text-frost"
               }`}
             >
-              {selected && (
-                <motion.span
-                  layoutId="module-pill"
-                  className="absolute inset-0 -z-0 rounded-full bg-cyan"
-                  transition={{ type: "spring", stiffness: 400, damping: 34 }}
-                />
-              )}
               <span className="relative">
                 {m.year} · {m.module.replace("Module ", "M-")}
               </span>
@@ -88,29 +141,29 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
       </div>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1.15fr_1fr]">
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Curriculum network with ${current.module} highlighted`}>
-          {/* Synapses into and out of the active layer carry signal. */}
-          {layout.nodes.slice(0, -1).map((col, i) =>
-            col.flatMap((a, ai) =>
-              layout.nodes[i + 1]!.map((b, bi) => {
-                const live = i + 1 === active || i === active;
-                return (
-                  <line
-                    key={`${i}-${ai}-${bi}`}
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    className={live ? "stroke-cyan" : "stroke-line"}
-                    strokeOpacity={live ? 0.5 : 0.7}
-                    strokeWidth={live ? 0.9 : 0.6}
-                    strokeDasharray={live ? "6 114" : undefined}
-                    style={live ? { animation: `signal ${1.6 + ((ai + bi) % 5) * 0.25}s linear infinite` } : undefined}
-                  />
-                );
-              }),
-            ),
-          )}
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          data-live
+          className="h-auto w-full"
+          role="img"
+          aria-label={`Curriculum network with ${current.module} highlighted`}
+        >
+          {/* Synapses, as a handful of paths rather than hundreds of lines:
+              everything at rest in one, and the wires into and out of the
+              active layer in five groups that fire at slightly different
+              speeds. Re-keyed per selection so each choice replays the burst. */}
+          <path d={synapses.rest} fill="none" className="stroke-line" strokeOpacity={0.7} strokeWidth={0.6} />
+          {synapses.live.map((d, g) => (
+            <path
+              key={`${active}-${g}`}
+              d={d}
+              fill="none"
+              className="signal signal--burst stroke-cyan"
+              strokeOpacity={0.55}
+              strokeWidth={0.9}
+              style={{ animationDuration: `${1.4 + g * 0.2}s` }}
+            />
+          ))}
           {layout.nodes.map((col, i) =>
             col.map((n, k) => {
               const on = i === active;
@@ -141,17 +194,7 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
           ))}
         </svg>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={current.id}
-            id={`panel-${current.id}`}
-            role="tabpanel"
-            aria-labelledby={`tab-${current.id}`}
-            initial={{ opacity: 0, x: 16, filter: "blur(6px)" }}
-            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, x: -16, filter: "blur(6px)" }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          >
+        <div key={current.id} id={`panel-${current.id}`} role="tabpanel" aria-labelledby={`tab-${current.id}`} className="swap-in">
             <p className="label text-violet">
               {current.year} · {current.module}
               {current.credits ? ` · ${current.credits} credits` : ""}
@@ -169,8 +212,7 @@ export default function CurriculumExplorer({ modules }: { modules: Module[] }) {
                 </li>
               ))}
             </ul>
-          </motion.div>
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );

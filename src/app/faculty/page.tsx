@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import FacultyGrid from "@/components/FacultyGrid";
-import HoloImage from "@/components/fx/HoloImage";
+import HoloImage from "@/components/HoloImage";
 import PageHero from "@/components/PageHero";
 import { Container, ExtLink, SectionHead, sectionY } from "@/components/ui";
 import { hodMessage, mentors } from "@/content/about";
@@ -10,7 +10,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Faculty",
   description: `The Head of Department and faculty of ${dept.short}, VIT Pune — with the patents, publications and programmes behind each name.`,
-  alternates: { canonical: "/faculty" },
+  alternates: { canonical: "/faculty/" },
 };
 
 export default function FacultyPage() {
@@ -30,7 +30,12 @@ export default function FacultyPage() {
       <section aria-labelledby="head" className={sectionY}>
         <Container>
           <div data-reveal className="holo border-orbit grid gap-10 overflow-hidden p-4 sm:p-6 lg:grid-cols-[22rem_1fr] lg:p-8">
-            <HoloImage src={dept.hod.portrait} alt={`${dept.hod.name}, ${dept.hod.role}`} caption={dept.hod.name} className="aspect-[4/5]" />
+            <HoloImage
+              photo={dept.hod.portrait}
+              alt={`${dept.hod.name}, ${dept.hod.role}`}
+              className="aspect-[4/5]"
+              sizes="(min-width: 1024px) 22rem, 92vw"
+            />
             <div className="flex flex-col justify-center p-2 sm:p-4">
               <p className="label text-cyan">Head of Department</p>
               <h2 id="head" className="mt-4 text-display-l text-frost">

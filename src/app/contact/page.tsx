@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import MapEmbed from "@/components/MapEmbed";
 import PageHero from "@/components/PageHero";
 import Transmission from "@/components/Transmission";
 import { Container, delay, ExtLink, SectionHead, sectionY } from "@/components/ui";
@@ -7,7 +8,7 @@ import { dept, fullAddress, institute } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description: `Contact the Department of ${dept.name}, VIT Pune — ${dept.phone.display}, ${dept.email}. Admissions: ${institute.admissions.phones[0].display}.`,
-  alternates: { canonical: "/contact" },
+  alternates: { canonical: "/contact/" },
 };
 
 const channels = [
@@ -39,6 +40,7 @@ const channels = [
 
 export default function ContactPage() {
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(institute.mapsQuery)}&output=embed`;
+  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(institute.mapsQuery)}`;
   return (
     <>
       <PageHero
@@ -115,18 +117,17 @@ export default function ContactPage() {
                 {institute.campus.geo.lat.toFixed(2)}° N · {institute.campus.geo.lng.toFixed(2)}° E
               </p>
               <p className="mt-6 text-small">
-                <ExtLink href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(institute.mapsQuery)}`}>
+                <ExtLink href={mapsLink}>
                   Open in Google Maps
                 </ExtLink>
               </p>
             </address>
             <div className="holo relative min-h-80 overflow-hidden p-2">
-              <iframe
+              <MapEmbed
                 title={`Map: ${institute.name}, ${institute.campus.name}`}
                 src={mapSrc}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="h-full min-h-80 w-full rounded-xl border-0 [filter:invert(0.9)_hue-rotate(180deg)_saturate(0.6)_brightness(0.95)]"
+                href={mapsLink}
+                coords={`${institute.campus.geo.lat.toFixed(2)}° N · ${institute.campus.geo.lng.toFixed(2)}° E · ${institute.campus.name}`}
               />
             </div>
           </div>

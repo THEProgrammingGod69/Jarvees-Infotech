@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Readout } from "@/components/cards";
-import Counter from "@/components/fx/Counter";
-import Marquee from "@/components/fx/Marquee";
+import Marquee from "@/components/Marquee";
+import Odometer from "@/components/Odometer";
 import PageHero from "@/components/PageHero";
 import { Chip, Container, delay, SectionHead, sectionY } from "@/components/ui";
 import { internshipHosts, internshipSummaries, placementSummary, recruiters, topOffers } from "@/content/outcomes";
@@ -10,7 +10,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Placements",
   description: `Placement and internship outcomes for ${dept.short}, VIT Pune, AY 2025–26 — highest offer ₹${placementSummary.highestLpa} LPA, average ₹${placementSummary.averageLpa} LPA.`,
-  alternates: { canonical: "/placements" },
+  alternates: { canonical: "/placements/" },
 };
 
 const inr = new Intl.NumberFormat("en-IN");
@@ -41,13 +41,13 @@ export default function PlacementsPage() {
           </h2>
           <ul className="grid gap-4 md:grid-cols-3">
             <li data-reveal>
-              <Readout value={<Counter value={placementSummary.placedPercent} suffix="%" />} label="Students placed" detail="Season ongoing at publication" />
+              <Readout value={<Odometer value={placementSummary.placedPercent} suffix="%" />} label="Students placed" detail="Season ongoing at publication" />
             </li>
             <li data-reveal style={delay(80)}>
-              <Readout value={<Counter value={placementSummary.highestLpa} decimals={2} prefix="₹" suffix=" LPA" />} label="Highest package" detail="PhonePe" />
+              <Readout value={<Odometer value={placementSummary.highestLpa} decimals={2} prefix="₹" suffix=" LPA" />} label="Highest package" detail="PhonePe" />
             </li>
             <li data-reveal style={delay(160)}>
-              <Readout value={<Counter value={placementSummary.averageLpa} decimals={2} prefix="₹" suffix=" LPA" />} label="Average package" detail="Across offers to date" />
+              <Readout value={<Odometer value={placementSummary.averageLpa} decimals={2} prefix="₹" suffix=" LPA" />} label="Average package" detail="Across offers to date" />
             </li>
           </ul>
         </Container>

@@ -1,6 +1,6 @@
 import type { Achievement } from "@/content/events";
 import { labs } from "@/content/labs";
-import HoloImage from "@/components/fx/HoloImage";
+import HoloImage from "@/components/HoloImage";
 import { Chip } from "@/components/ui";
 
 const levelTone = { International: "magenta", National: "cyan", "Inter-college": "violet" } as const;
@@ -28,7 +28,7 @@ export function AchievementCard({ a, className = "" }: { a: Achievement; classNa
 export function LabCard({ lab, index }: { lab: (typeof labs)[number]; index: number }) {
   return (
     <article data-tilt className="holo group/lab flex h-full flex-col overflow-hidden p-3">
-      <HoloImage src={lab.photo} alt={`${lab.name}, CSE (AI), VIT Pune`} caption={lab.name} />
+      <HoloImage photo={lab.photo} alt={`${lab.name}, CSE (AI), VIT Pune`} sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 92vw" />
       <div className="flex flex-1 flex-col p-4 pt-5">
         <div className="flex items-center justify-between">
           <span className="label text-cyan">LAB-{String(index + 1).padStart(2, "0")}</span>

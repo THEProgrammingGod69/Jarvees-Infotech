@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { AchievementCard, LabCard, Readout } from "@/components/cards";
-import CoreStage from "@/components/fx/CoreStage";
-import Countdown from "@/components/fx/Countdown";
-import Counter from "@/components/fx/Counter";
-import Marquee from "@/components/fx/Marquee";
-import NeuralCore from "@/components/fx/NeuralCore";
-import Rail from "@/components/fx/Rail";
-import Scramble from "@/components/fx/Scramble";
-import Terminal from "@/components/fx/Terminal";
-import type { ShapeName } from "@/components/fx/shapes";
-import { Button, Chip, Container, delay, LiveDot, SectionHead, sectionY } from "@/components/ui";
+import NeuralCore from "@/components/core/NeuralCore";
+import Countdown from "@/components/Countdown";
+import AttentionQuote from "@/components/home/AttentionQuote";
+import ForwardPass, { type Layer } from "@/components/home/ForwardPass";
+import HeroTitle from "@/components/home/HeroTitle";
+import TestimonialStack from "@/components/home/TestimonialStack";
+import Trace from "@/components/home/Trace";
+import Marquee from "@/components/Marquee";
+import Odometer from "@/components/Odometer";
+import Rail from "@/components/Rail";
+import Terminal from "@/components/Terminal";
+import { Button, Container, delay, LiveDot, SectionHead, sectionY, Words } from "@/components/ui";
 import { vision } from "@/content/about";
 import { modules } from "@/content/curriculum";
 import { achievements, announcements, codeApex3 } from "@/content/events";
@@ -23,14 +25,7 @@ const courseNames = (ids: string[]) =>
     .filter((m) => ids.includes(m.id))
     .flatMap((m) => m.courses.filter((c) => c.kind === "core" || c.kind === "elective").map((c) => c.name));
 
-const layers: {
-  shape: ShapeName;
-  code: string;
-  year: string;
-  title: string;
-  body: string;
-  chips: string[];
-}[] = [
+const layers: Layer[] = [
   {
     shape: "plane",
     code: "Layer 01 · Input",
@@ -67,89 +62,103 @@ const layers: {
 
 const half = Math.ceil(recruiters.length / 2);
 
+/**
+ * Sections declare what the Neural Core should become while they hold the
+ * centre of the screen (`data-core-*`); NeuralCore reads them. No section
+ * on this page ships client code of its own.
+ */
 export default function Home() {
   return (
     <>
       <NeuralCore />
       <div className="relative z-10">
         {/* ------------------------------------------------------------ Hero */}
-        <CoreStage
-          shape="brain"
-          intensity={1}
-          align="right"
+        <section
           aria-labelledby="hero-title"
-          className="relative flex min-h-[100svh] items-center pt-28 pb-20"
+          data-core-shape="brain"
+          data-core-intensity="1"
+          data-core-align="right"
+          data-live
+          className="hero relative flex min-h-[100svh] items-center pt-28 pb-20"
         >
           <Container>
             <div className="max-w-3xl">
-              <Link
-                href="/events"
-                className="rise group inline-flex items-center gap-3 rounded-full border border-magenta/30 bg-void/70 py-1.5 pr-4 pl-3 transition-colors hover:border-magenta/70"
-              >
-                <LiveDot />
-                <span className="label text-frost">
-                  {codeApex3.name} <span className="text-haze">· registrations close {codeApex3.registerBy.replace(" 2026", "")}</span>
-                </span>
-                <span aria-hidden="true" className="text-magenta transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </Link>
+              <div className="lift">
+                <Link
+                  href="/events"
+                  className="rise group inline-flex items-center gap-3 rounded-full border border-magenta/30 bg-void/70 py-1.5 pr-4 pl-3 transition-colors hover:border-magenta/70"
+                >
+                  <LiveDot />
+                  <span className="label text-frost">
+                    {codeApex3.name} <span className="text-haze">· registrations close {codeApex3.registerBy.replace(" 2026", "")}</span>
+                  </span>
+                  <span aria-hidden="true" className="text-magenta transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
 
-              <p className="label rise mt-10 text-haze" style={delay(60)}>
-                {institute.name}, Pune <span className="text-cyan">·</span> Est. {dept.established}
-              </p>
+                <p className="label rise mt-10 text-haze" style={delay(60)}>
+                  {institute.name}, Pune <span className="text-cyan">·</span> Est. {dept.established}
+                </p>
+              </div>
 
-              <h1 id="hero-title" className="mt-6 text-hero text-frost">
-                <span className="rise block" style={delay(120)}>
-                  <Scramble text="Engineering" delay={300} />
-                </span>
-                <span className="rise block text-gradient pb-2" style={delay(200)}>
-                  intelligence.
-                </span>
-              </h1>
+              <HeroTitle
+                id="hero-title"
+                lines={[
+                  { text: "Engineering" },
+                  { text: "intelligence.", gradient: true },
+                ]}
+              />
 
-              <p className="rise mt-8 max-w-xl text-body-l text-haze" style={delay(280)}>
-                The Department of Computer Science &amp; Engineering (Artificial Intelligence) trains engineers who build,
-                question and ship AI — on an autonomous curriculum that runs from data structures to generative models.
-              </p>
+              <div className="lift">
+                <p className="rise mt-8 max-w-xl text-body-l text-haze" style={delay(160)}>
+                  The Department of Computer Science &amp; Engineering (Artificial Intelligence) trains engineers who build,
+                  question and ship AI — on an autonomous curriculum that runs from data structures to generative models.
+                </p>
 
-              <div className="rise mt-10 flex flex-wrap gap-3" style={delay(360)}>
-                <Button href="/programme">Explore the programme</Button>
-                <Button href="/events" variant="ghost">
-                  See what students build
-                </Button>
+                <div className="rise mt-10 flex flex-wrap gap-3" style={delay(260)}>
+                  <Button href="/programme">Explore the programme</Button>
+                  <Button href="/events" variant="ghost">
+                    See what students build
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <dl className="rise mt-20 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4" style={delay(440)}>
-              {[
-                ["Intake", `${dept.intake}`],
-                ["NAAC", "A++"],
-                ["NIRF", "Top 150"],
-                ["Highest offer", `₹${placementSummary.highestLpa} LPA`],
-              ].map(([k, v]) => (
-                <div key={k} className="bg-void/85 px-5 py-4">
-                  <dt className="label text-haze">{k}</dt>
-                  <dd className="mt-1.5 font-display text-heading text-frost">{v}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="lift">
+              <dl
+                className="rise mt-20 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4"
+                style={delay(360)}
+              >
+                {[
+                  ["Intake", `${dept.intake}`],
+                  ["NAAC", "A++"],
+                  ["NIRF", "Top 150"],
+                  ["Highest offer", `₹${placementSummary.highestLpa} LPA`],
+                ].map(([k, v]) => (
+                  <div key={k} className="bg-void/85 px-5 py-4">
+                    <dt className="label text-haze">{k}</dt>
+                    <dd className="mt-1.5 font-display text-heading text-frost">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </Container>
 
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 right-[42%] hidden h-[38rem] w-[38rem] translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-violet)_22%,transparent),transparent_62%)] blur-2xl lg:right-[29%] lg:block"
+            className="pointer-events-none absolute top-1/2 right-[42%] hidden h-[38rem] w-[38rem] translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-violet)_18%,transparent),transparent_62%)] lg:right-[29%] lg:block"
           />
           <p aria-hidden="true" className="label absolute top-1/2 right-6 hidden origin-right translate-y-1/2 -rotate-90 text-haze xl:block">
             {`${institute.campus.geo.lat.toFixed(2)}° N · ${institute.campus.geo.lng.toFixed(2)}° E · BLDG 03 · FLOORS 2–3`}
           </p>
-          <div aria-hidden="true" className="absolute right-8 bottom-8 hidden items-center gap-4 lg:flex">
+          <div aria-hidden="true" className="lift absolute right-8 bottom-8 hidden items-center gap-4 lg:flex">
             <span className="label text-haze">Scroll · run the forward pass</span>
             <span className="relative h-12 w-px overflow-hidden bg-line">
-              <span className="absolute inset-x-0 top-0 h-1/2 animate-[scan_1.8s_linear_infinite] bg-cyan" />
+              <span className="scroll-cue absolute inset-x-0 top-0 h-1/2 bg-cyan" />
             </span>
           </div>
-        </CoreStage>
+        </section>
 
         {/* ---------------------------------------------------------- Ticker */}
         <div className="border-y border-line bg-void/85 py-4">
@@ -166,7 +175,7 @@ export default function Home() {
         </div>
 
         {/* ----------------------------------------------------------- Stats */}
-        <CoreStage shape="sphere" intensity={0.32} align="center" aria-labelledby="signal-title" className={sectionY}>
+        <section aria-labelledby="signal-title" data-core-shape="sphere" data-core-intensity="0.32" data-core-align="center" className={sectionY}>
           <Container>
             <SectionHead
               id="signal-title"
@@ -177,11 +186,11 @@ export default function Home() {
             />
             <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {[
-                { label: "Annual intake", value: <Counter value={dept.intake} />, detail: "B.Tech seats" },
-                { label: "Highest package", value: <Counter value={placementSummary.highestLpa} decimals={2} prefix="₹" />, detail: "LPA · AY 2025–26" },
-                { label: "Average package", value: <Counter value={placementSummary.averageLpa} decimals={2} prefix="₹" />, detail: "LPA · season ongoing" },
-                { label: "Top stipend", value: <Counter value={87000} prefix="₹" />, detail: "per month · Sem 7 internship" },
-                { label: "Hackathon teams", value: <Counter value={240} suffix="+" />, detail: "registered for Code Verse" },
+                { label: "Annual intake", value: <Odometer value={dept.intake} />, detail: "B.Tech seats" },
+                { label: "Highest package", value: <Odometer value={placementSummary.highestLpa} decimals={2} prefix="₹" />, detail: "LPA · AY 2025–26" },
+                { label: "Average package", value: <Odometer value={placementSummary.averageLpa} decimals={2} prefix="₹" />, detail: "LPA · season ongoing" },
+                { label: "Top stipend", value: <Odometer value={87000} prefix="₹" />, detail: "per month · Sem 7 internship" },
+                { label: "Hackathon teams", value: <Odometer value={240} suffix="+" />, detail: "registered for Code Verse" },
               ].map((s, i) => (
                 <div key={s.label} data-reveal style={delay(i * 80)}>
                   <Readout value={s.value} label={s.label} detail={s.detail} />
@@ -189,16 +198,16 @@ export default function Home() {
               ))}
             </div>
           </Container>
-        </CoreStage>
+        </section>
+
+        <Trace />
 
         {/* ------------------------------------------------- Vision/terminal */}
-        <CoreStage shape="galaxy" intensity={0.55} align="left" aria-labelledby="vision-title" className={sectionY}>
+        <section aria-labelledby="vision-title" data-core-shape="galaxy" data-core-intensity="0.55" data-core-align="left" className={sectionY}>
           <Container className="grid items-center gap-14 lg:grid-cols-2">
             <div className="lg:order-2">
               <SectionHead id="vision-title" index="01" label="Vision" title="Intelligence, for society." />
-              <blockquote data-reveal className="mt-8 border-l border-cyan/50 pl-6 font-display text-display-m text-frost" style={delay(120)}>
-                “{vision}”
-              </blockquote>
+              <AttentionQuote text={vision} className="mt-8 border-l border-cyan/50 pl-6 font-display text-display-m text-frost" />
               <div data-reveal className="mt-8" style={delay(200)}>
                 <Button href="/about" variant="ghost">
                   Mission &amp; objectives
@@ -224,7 +233,7 @@ export default function Home() {
               />
             </div>
           </Container>
-        </CoreStage>
+        </section>
 
         {/* ---------------------------------------------------- Forward pass */}
         <section aria-labelledby="pass-title" className="pt-[clamp(4.5rem,9vw,8.5rem)]">
@@ -237,33 +246,7 @@ export default function Home() {
               intro="A degree here is built like the networks it teaches: an input layer, two hidden layers of increasing depth, and an output. Keep scrolling — the core re-forms at each one."
             />
           </Container>
-          {layers.map((l, i) => (
-            <CoreStage key={l.code} shape={l.shape} intensity={0.95} align="right" aria-labelledby={`layer-${i}`} className="flex min-h-[88vh] items-center py-16">
-              <Container>
-                <div data-reveal className="holo max-w-xl p-7 sm:p-10">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="label text-cyan">{l.code}</p>
-                    <p className="label text-haze">{String(i + 1).padStart(2, "0")} / 04</p>
-                  </div>
-                  <p className="label mt-6 text-violet">{l.year}</p>
-                  <h3 id={`layer-${i}`} className="mt-3 text-display-xl text-frost">
-                    {l.title}
-                  </h3>
-                  <p className="mt-5 text-body text-haze">{l.body}</p>
-                  <ul className="mt-7 flex flex-wrap gap-2" aria-label="Courses">
-                    {l.chips.map((c) => (
-                      <li key={c}>
-                        <Chip>{c}</Chip>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-8 h-1 w-full overflow-hidden rounded-full bg-line">
-                    <div className="h-full rounded-full bg-gradient-to-r from-cyan to-violet" style={{ width: `${(i + 1) * 25}%` }} />
-                  </div>
-                </div>
-              </Container>
-            </CoreStage>
-          ))}
+          <ForwardPass layers={layers} />
           <Container className="pb-8">
             <div data-reveal className="flex justify-center">
               <Button href="/programme" variant="ghost">
@@ -274,7 +257,7 @@ export default function Home() {
         </section>
 
         {/* ------------------------------------------------------------ Labs */}
-        <CoreStage shape="sphere" intensity={0.22} align="center" aria-labelledby="labs-title" className={sectionY}>
+        <section aria-labelledby="labs-title" data-core-shape="sphere" data-core-intensity="0.22" data-core-align="center" className={sectionY}>
           <Container>
             <div className="flex flex-wrap items-end justify-between gap-8">
               <SectionHead
@@ -298,17 +281,19 @@ export default function Home() {
               ))}
             </ul>
           </Container>
-        </CoreStage>
+        </section>
+
+        <Trace variant={1} />
 
         {/* ---------------------------------------------------- Achievements */}
-        <CoreStage shape="galaxy" intensity={0.3} align="center" aria-labelledby="wins-title" className={sectionY}>
+        <section aria-labelledby="wins-title" data-core-shape="galaxy" data-core-intensity="0.3" data-core-align="center" className={sectionY}>
           <Container>
             <SectionHead
               id="wins-title"
               index="04"
               label="Signal from the field"
               title="Students who ship — and win."
-              intro="Smart India Hackathon, the Allianz India Tech Championship, IIT Delhi's Robocon, IIT Roorkee's DATAFORGE. A sample of the last two years."
+              intro="Smart India Hackathon, the Allianz India Tech Championship, IIT Delhi's Robocon, IIT Roorkee's DATAFORGE. A sample of the last two years — drag the rail, or throw it."
             />
             <div className="mt-10" data-reveal>
               <Rail label="Student achievements">
@@ -320,10 +305,10 @@ export default function Home() {
               </Rail>
             </div>
           </Container>
-        </CoreStage>
+        </section>
 
         {/* ------------------------------------------------------ Recruiters */}
-        <CoreStage shape="network" intensity={0.25} align="center" aria-labelledby="recruit-title" className={sectionY}>
+        <section aria-labelledby="recruit-title" data-core-shape="network" data-core-intensity="0.25" data-core-align="center" className={sectionY}>
           <Container>
             <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-end">
               <SectionHead
@@ -334,9 +319,9 @@ export default function Home() {
                 intro="The 2025–26 placement season was still running when these figures were published — read them as a snapshot, not a final count."
               />
               <div className="grid grid-cols-3 gap-3" data-reveal>
-                <Readout value={<Counter value={placementSummary.placedPercent} suffix="%" />} label="Placed" detail="so far" />
-                <Readout value={<Counter value={placementSummary.highestLpa} decimals={2} />} label="Highest" detail="LPA" />
-                <Readout value={<Counter value={placementSummary.averageLpa} decimals={2} />} label="Average" detail="LPA" />
+                <Readout value={<Odometer value={placementSummary.placedPercent} suffix="%" />} label="Placed" detail="so far" />
+                <Readout value={<Odometer value={placementSummary.highestLpa} decimals={2} />} label="Highest" detail="LPA" />
+                <Readout value={<Odometer value={placementSummary.averageLpa} decimals={2} />} label="Average" detail="LPA" />
               </div>
             </div>
           </Container>
@@ -361,10 +346,10 @@ export default function Home() {
               </Button>
             </div>
           </Container>
-        </CoreStage>
+        </section>
 
         {/* ------------------------------------------------------- Code Apex */}
-        <CoreStage shape="glyph" intensity={0.4} align="right" aria-labelledby="apex-title" className={sectionY}>
+        <section aria-labelledby="apex-title" data-core-shape="glyph" data-core-intensity="0.4" data-core-align="right" className={sectionY}>
           <Container>
             <div data-reveal className="border-orbit holo overflow-hidden rounded-[1.75rem] p-7 sm:p-12">
               <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
@@ -372,7 +357,7 @@ export default function Home() {
                   <p className="label flex items-center gap-3 text-magenta">
                     <LiveDot /> Registrations open · close {codeApex3.registerBy}
                   </p>
-                  <h2 id="apex-title" className="glitch mt-6 text-display-xl text-frost" data-text={codeApex3.name}>
+                  <h2 id="apex-title" data-live className="glitch mt-6 text-display-xl text-frost" data-text={codeApex3.name}>
                     {codeApex3.name}
                   </h2>
                   <p className="mt-4 font-display text-display-m text-gradient">{codeApex3.tagline}</p>
@@ -392,13 +377,13 @@ export default function Home() {
                 <div>
                   <p className="label text-haze">Grand Finale · 24 October 2026</p>
                   <div className="mt-4">
-                    <Countdown to={codeApex3.finale} endedLabel="Grand Finale in progress" />
+                    <Countdown to={codeApex3.finale} label={`Time until the ${codeApex3.name} Grand Finale`} endedLabel="Grand Finale in progress" />
                   </div>
                   <ul className="mt-8 grid grid-cols-3 gap-3">
                     {codeApex3.prizes.map((p) => (
-                      <li key={p.place} className="rounded-xl border border-line bg-void/50 p-4">
+                      <li key={p.place} className="rounded-xl border border-line bg-void/50 p-3 sm:p-4">
                         <p className="label text-haze">{p.place}</p>
-                        <p className="mt-2 font-display text-heading text-frost">{p.amount}</p>
+                        <p className="mt-2 font-display text-[clamp(0.8rem,3.4vw,1.125rem)] font-semibold whitespace-nowrap text-frost">{p.amount}</p>
                       </li>
                     ))}
                   </ul>
@@ -406,51 +391,36 @@ export default function Home() {
               </div>
             </div>
           </Container>
-        </CoreStage>
+        </section>
 
         {/* ---------------------------------------------------- Testimonials */}
-        <CoreStage shape="sphere" intensity={0.25} align="center" aria-labelledby="voices-title" className={sectionY}>
+        <section aria-labelledby="voices-title" data-core-shape="sphere" data-core-intensity="0.25" data-core-align="center" className={sectionY}>
           <Container>
             <SectionHead id="voices-title" index="06" label="Students' speak" title="In their words." align="center" />
-            <ul className="mt-14 grid gap-5 lg:grid-cols-3">
-              {testimonials.map((t, i) => (
-                <li key={t.name} data-reveal style={delay(i * 100)}>
-                  <figure className="holo flex h-full flex-col p-7">
-                    <span aria-hidden="true" className="font-display text-[4rem] leading-none text-gradient">
-                      “
-                    </span>
-                    <blockquote className="mt-2 text-body text-frost/90">{t.quote}</blockquote>
-                    <figcaption className="mt-auto flex items-center gap-3 pt-8">
-                      <span className="grid h-10 w-10 place-items-center rounded-full border border-cyan/40 font-display text-small text-cyan">
-                        {t.name
-                          .split(" ")
-                          .map((p) => p[0])
-                          .join("")}
-                      </span>
-                      <span>
-                        <span className="block text-small font-semibold text-frost">{t.name}</span>
-                        <span className="label block text-haze">{t.programme}</span>
-                      </span>
-                    </figcaption>
-                  </figure>
-                </li>
-              ))}
-            </ul>
+            <TestimonialStack items={testimonials} />
           </Container>
-        </CoreStage>
+        </section>
+
+        <Trace />
 
         {/* ------------------------------------------------------------- CTA */}
-        <CoreStage shape="brain" intensity={0.7} align="center" aria-labelledby="cta-title" className="py-[clamp(6rem,14vw,12rem)]">
+        <section aria-labelledby="cta-title" data-core-shape="brain" data-core-intensity="0.7" data-core-align="center" className="py-[clamp(6rem,14vw,12rem)]">
           <Container className="text-center">
             <p data-reveal className="label text-cyan">
               Admissions · {institute.short}
             </p>
-            <h2 id="cta-title" data-reveal className="mx-auto mt-6 max-w-4xl text-hero text-frost" style={delay(80)}>
-              Your forward pass <span className="text-gradient">starts here.</span>
+            <h2 id="cta-title" data-reveal="keep" className="mx-auto mt-6 max-w-4xl text-hero text-frost">
+              <Words text="Your forward pass starts here." gradientFrom={3} delayMs={80} />
             </h2>
             <p data-reveal className="mx-auto mt-8 max-w-xl text-body-l text-haze" style={delay(160)}>
-              Admission enquiries: <a className="text-frost hover:text-cyan" href={institute.admissions.phones[0].href}>{institute.admissions.phones[0].display}</a>{" "}
-              · <a className="text-frost hover:text-cyan" href={`mailto:${institute.admissions.email}`}>{institute.admissions.email}</a>
+              Admission enquiries:{" "}
+              <a className="text-frost hover:text-cyan" href={institute.admissions.phones[0].href}>
+                {institute.admissions.phones[0].display}
+              </a>{" "}
+              ·{" "}
+              <a className="text-frost hover:text-cyan" href={`mailto:${institute.admissions.email}`}>
+                {institute.admissions.email}
+              </a>
             </p>
             <div data-reveal className="mt-10 flex flex-wrap justify-center gap-3" style={delay(240)}>
               <Button href={institute.admissionsUrl} external>
@@ -461,7 +431,7 @@ export default function Home() {
               </Button>
             </div>
           </Container>
-        </CoreStage>
+        </section>
       </div>
     </>
   );

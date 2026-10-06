@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Readout } from "@/components/cards";
-import HoloImage from "@/components/fx/HoloImage";
+import AttentionQuote from "@/components/home/AttentionQuote";
+import HoloImage from "@/components/HoloImage";
 import PageHero from "@/components/PageHero";
 import { Chip, Container, delay, ExtLink, SectionHead, sectionY } from "@/components/ui";
 import { credentials, hodMessage, instituteVision, mentors, missions, peos, pos, psos, vision } from "@/content/about";
@@ -9,7 +10,7 @@ import { dept, institute } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description: `Vision, mission, programme objectives and the Head's message for the Department of ${dept.name}, ${institute.name}, Pune.`,
-  alternates: { canonical: "/about" },
+  alternates: { canonical: "/about/" },
 };
 
 export default function AboutPage() {
@@ -45,9 +46,7 @@ export default function AboutPage() {
         <Container className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHead id="vision" index="01" label="Vision" title="Why we exist." />
           <div className="space-y-10">
-            <blockquote data-reveal className="font-display text-display-l text-gradient">
-              “{vision}”
-            </blockquote>
+            <AttentionQuote text={vision} className="font-display text-display-l text-frost" />
             <div data-reveal className="border-l border-line-bright pl-6" style={delay(120)}>
               <p className="label text-haze">Institute vision</p>
               <p className="mt-2 text-body-l text-frost">“{instituteVision}”</p>
@@ -104,7 +103,12 @@ export default function AboutPage() {
         <Container className="grid items-start gap-12 lg:grid-cols-[0.75fr_1.25fr]">
           <div data-reveal className="lg:sticky lg:top-28">
             <div className="holo hud-corners p-3">
-              <HoloImage src={dept.hod.portrait} alt={`${dept.hod.name}, ${dept.hod.role}`} caption={dept.hod.name} className="aspect-[4/5]" />
+              <HoloImage
+                photo={dept.hod.portrait}
+                alt={`${dept.hod.name}, ${dept.hod.role}`}
+                className="aspect-[4/5]"
+                sizes="(min-width: 1024px) 30vw, 92vw"
+              />
               <div className="p-4">
                 <p className="text-heading text-frost">{dept.hod.name}</p>
                 <p className="label mt-1 text-cyan">{dept.hod.role}</p>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Constellation from "@/components/Constellation";
-import Marquee from "@/components/fx/Marquee";
+import Marquee from "@/components/Marquee";
 import PageHero from "@/components/PageHero";
 import PatentBoard from "@/components/PatentBoard";
 import { Chip, Container, delay, SectionHead, sectionY } from "@/components/ui";
@@ -10,7 +10,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Research",
   description: `Patents, publications, industry projects and student innovation from ${dept.short}, VIT Pune.`,
-  alternates: { canonical: "/research" },
+  alternates: { canonical: "/research/" },
 };
 
 export default function ResearchPage() {

@@ -61,7 +61,7 @@
 
   --text-heading: 1.125rem;
   --text-heading--line-height: 1.35;
-  --text-heading--font-weight: 650;
+  --text-heading--font-weight: 600;
 
   --text-body-l: 1.125rem;
   --text-body-l--line-height: 1.7;
@@ -81,53 +81,55 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
 
-  --animate-pulse-dot: pulse-dot 2.2s var(--ease-out-expo) infinite;
   --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
   --animate-marquee-reverse: marquee var(--marquee-duration, 40s) linear infinite reverse;
   --animate-spin-slow: spin 14s linear infinite;
-  --animate-float: float 7s ease-in-out infinite;
 }
+
+/* ==========================================================================
+   Performance rules this file follows (measured, see DESIGN.md §Performance)
+
+   1. Anything that moves continuously animates transform or opacity only,
+      so the compositor moves it without repainting.
+   2. No filter, backdrop-filter or mix-blend-mode over animated content.
+      Blurring a full-viewport layer every frame was the single largest cost
+      on the old site (22 → 8 fps when scrolling in a software-GPU test).
+   3. Infinite animations only run while their element is on screen
+      (`.is-live`, toggled by one IntersectionObserver in MotionRuntime).
+   4. Scroll-linked effects use CSS scroll-driven animations, which run on
+      the compositor thread and stay smooth even if the main thread is busy.
+   ========================================================================== */
 
 /* ==========================================================================
    Keyframes
    ========================================================================== */
-
-@keyframes pulse-dot {
-  0% { box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 70%, transparent); }
-  70% { box-shadow: 0 0 0 10px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
 
 @keyframes marquee {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
 }
 
-@keyframes float {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(0, -10px, 0); }
-}
-
 @keyframes rise {
-  from { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(8px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: none; }
 }
 
-/* Opacity only: a transform or filter here would make every page a
-   containing block for position:fixed, and the Neural Core is fixed. */
-@keyframes page-in {
+@keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes aurora-a {
-  0%, 100% { transform: translate3d(-10%, -6%, 0) scale(1); }
-  50% { transform: translate3d(8%, 6%, 0) scale(1.15); }
+@keyframes glow-drift {
+  to { transform: translate3d(5%, -4%, 0) rotate(6deg) scale(1.06); }
 }
 
-@keyframes aurora-b {
-  0%, 100% { transform: translate3d(12%, 8%, 0) scale(1.1); }
-  50% { transform: translate3d(-6%, -10%, 0) scale(0.95); }
+@keyframes ping {
+  75%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+@keyframes scan-once {
+  from { transform: translate3d(0, -100%, 0); opacity: 1; }
+  to { transform: translate3d(0, 110%, 0); opacity: 0.4; }
 }
 
 @keyframes scan {
@@ -141,26 +143,6 @@
 
 @keyframes border-spin {
   to { --angle: 360deg; }
-}
-
-/* Transform, not background-position, so the compositor moves the grid
-   without repainting it. One cell per loop makes the wrap invisible. */
-@keyframes grid-drift {
-  to { transform: translate3d(64px, 64px, 0); }
-}
-
-@keyframes boot-out {
-  to { opacity: 0; visibility: hidden; }
-}
-
-@keyframes boot-line {
-  from { opacity: 0; transform: translate3d(-6px, 0, 0); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes boot-bar {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
 }
 
 @keyframes glitch-a {
@@ -178,16 +160,150 @@
   75% { clip-path: inset(25% 0 55% 0); transform: translate(-2px, 1px); }
 }
 
-@keyframes dash {
-  to { stroke-dashoffset: 0; }
-}
-
 @keyframes signal {
   from { stroke-dashoffset: 120; }
   to { stroke-dashoffset: -120; }
 }
 
-/* Typed CSS custom property so the gradient border can rotate smoothly. */
+/* A finite burst of signal: dashes only while it runs, solid afterwards. */
+@keyframes signal-burst {
+  from { stroke-dasharray: 8 112; stroke-dashoffset: 120; }
+  to { stroke-dasharray: 8 112; stroke-dashoffset: -120; }
+}
+
+@keyframes swap-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes char-in {
+  from { opacity: 0; transform: translate3d(0, 0.42em, 0) rotate(5deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes palette-in {
+  from { opacity: 0; transform: translate3d(0, -12px, 0) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes menu-in {
+  from { clip-path: circle(0% at calc(100% - 2.5rem) 2.25rem); }
+  to { clip-path: circle(150% at calc(100% - 2.5rem) 2.25rem); }
+}
+
+@keyframes menu-out {
+  from { clip-path: circle(150% at calc(100% - 2.5rem) 2.25rem); }
+  to { clip-path: circle(0% at calc(100% - 2.5rem) 2.25rem); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translate3d(-24px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes trace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes flow {
+  to { stroke-dashoffset: -1; }
+}
+
+/* Route change: one beam of light sweeps the page. */
+@keyframes wipe {
+  0% { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(0, 100vh, 0); opacity: 0; }
+}
+
+/* Split-flap: the old upper leaf falls, the new lower leaf lands. */
+@keyframes flap-fall {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(-90deg); }
+}
+
+@keyframes flap-land {
+  from { transform: rotateX(90deg); }
+  to { transform: rotateX(0deg); }
+}
+
+/* Scroll-driven keyframes (timelines are attached further down). */
+@keyframes disperse {
+  to { transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--dr)) scale(0.2); opacity: 0; }
+}
+
+@keyframes lift-away {
+  to { transform: translate3d(0, -14vh, 0); opacity: 0; }
+}
+
+@keyframes attend {
+  to { opacity: 1; }
+}
+
+@keyframes attend-head {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  50.01% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+@keyframes hpass-slide {
+  to { transform: translate3d(-75%, 0, 0); }
+}
+
+@keyframes hpass-index {
+  to { transform: translate3d(0, -75%, 0); }
+}
+
+@keyframes hpass-parallax {
+  from { transform: translate3d(-18%, 0, 0); }
+  to { transform: translate3d(18%, 0, 0); }
+}
+
+@keyframes panel-in {
+  from { transform: translate3d(6%, 0, 0) scale(0.88); opacity: 0.25; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes panel-out {
+  from { transform: none; opacity: 1; }
+  to { transform: translate3d(-6%, 0, 0) scale(0.9); opacity: 0.2; }
+}
+
+@keyframes node-pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes recede {
+  to { transform: translate3d(0, -1.25rem, 0) scale(0.92); }
+}
+
+@keyframes dim {
+  to { opacity: 0.62; }
+}
+
+@keyframes floor-in {
+  from { transform: translate3d(0, -60px, 0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Typed custom property so the conic border can sweep smoothly. */
 @property --angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -204,11 +320,21 @@
     background: var(--color-void);
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: 5.5rem;
+    /* The page never shifts sideways when a dialog locks scrolling. */
+    scrollbar-gutter: stable;
+  }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
   }
 
   body {
     min-height: 100dvh;
-    background: var(--color-void);
+    /* Film grain as a static, tiled background: painted once, never
+       re-composited. (It used to be a full-screen blended overlay.) */
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+      var(--color-void);
     color: var(--color-frost);
     font-family: var(--font-body);
     font-size: var(--text-body);
@@ -236,85 +362,68 @@
   img, svg, canvas, video {
     display: block;
   }
+
+  /* Sections after the first are not styled, laid out or painted until they
+     come near the viewport — the biggest single saving on first load for
+     long pages. `auto` remembers each section's real size once rendered. */
+  main section:not(:first-of-type) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1000px;
+  }
 }
 
 /* ==========================================================================
-   Atmosphere — fixed background layers. Transform/opacity only, so the
-   compositor carries them without layout or paint work.
+   Components
    ========================================================================== */
 
 @layer components {
+  /* --- Atmosphere --------------------------------------------------------
+     Two fixed layers: a soft colour field that drifts (one composited
+     texture moved by transform — radial gradients are already soft, so no
+     blur filter is needed) and a static masked grid. */
   .atmosphere {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
+    contain: strict;
   }
 
-  .atmosphere__aurora {
+  .atmosphere__glow {
     position: absolute;
-    width: 70vmax;
-    height: 70vmax;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.32;
+    inset: -20%;
+    background:
+      radial-gradient(38% 32% at 20% 14%, color-mix(in oklab, var(--color-violet) 22%, transparent), transparent 72%),
+      radial-gradient(34% 30% at 84% 88%, color-mix(in oklab, var(--color-cyan) 15%, transparent), transparent 72%);
+    animation: glow-drift 36s ease-in-out infinite alternate;
     will-change: transform;
-  }
-
-  .atmosphere__aurora--a {
-    top: -30vmax;
-    left: -20vmax;
-    background: radial-gradient(circle, color-mix(in oklab, var(--color-violet) 70%, transparent), transparent 65%);
-    animation: aurora-a 26s ease-in-out infinite;
-  }
-
-  .atmosphere__aurora--b {
-    bottom: -35vmax;
-    right: -25vmax;
-    background: radial-gradient(circle, color-mix(in oklab, var(--color-cyan) 55%, transparent), transparent 65%);
-    animation: aurora-b 32s ease-in-out infinite;
   }
 
   .atmosphere__grid {
     position: absolute;
-    inset: -64px 0 0 -64px;
-    will-change: transform;
+    inset: 0;
     background-image:
-      linear-gradient(to bottom, color-mix(in oklab, var(--color-dim) 16%, transparent) 1px, transparent 1px),
-      linear-gradient(to right, color-mix(in oklab, var(--color-dim) 16%, transparent) 1px, transparent 1px);
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-dim) 15%, transparent) 1px, transparent 1px),
+      linear-gradient(to right, color-mix(in oklab, var(--color-dim) 15%, transparent) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 10%, transparent 75%);
-    animation: grid-drift 18s linear infinite;
-  }
-
-  .atmosphere__noise {
-    position: absolute;
-    inset: 0;
-    opacity: 0.05;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
   /* --- Holographic surface ----------------------------------------------
-     The card system. A translucent panel, a hairline, and a spotlight that
-     follows the pointer (--mx/--my are written by <Holo>). The spotlight
-     paints the border and a faint wash, never the text. */
-  /* No backdrop-filter here on purpose: the atmosphere behind every card is
-     animated, so a blurred backdrop would be re-rasterised on every frame
-     for every card on screen. A near-opaque plane reads the same and costs
-     nothing; backdrop blur is reserved for the header and overlays. */
+     The card system: a near-opaque plane, a hairline, and a spotlight that
+     follows the pointer (--mx/--my, written by PointerFx). The spotlight is
+     only painted while hovered. */
   .holo {
     --mx: 50%;
     --my: 50%;
     position: relative;
     isolation: isolate;
-    background: color-mix(in oklab, var(--color-panel) 88%, transparent);
+    background: color-mix(in oklab, var(--color-panel) 90%, transparent);
     border: 1px solid var(--color-line);
     border-radius: 1.25rem;
     transition:
       border-color 0.4s var(--ease-out-expo),
-      background-color 0.4s var(--ease-out-expo),
       transform 0.5s var(--ease-out-expo);
   }
 
@@ -378,7 +487,9 @@
     background-repeat: no-repeat;
   }
 
-  /* Rotating conic border — used once per page on the primary panel. */
+  /* --- Orbit border ------------------------------------------------------
+     A conic sweep around a featured panel. It is a paint effect, so it runs
+     a few laps when the panel is revealed and on hover — never forever. */
   .border-orbit {
     position: relative;
     isolation: isolate;
@@ -393,16 +504,23 @@
     padding: 1px;
     background: conic-gradient(
       from var(--angle),
-      transparent 0deg,
+      color-mix(in oklab, var(--color-line-bright) 80%, transparent) 0deg,
       var(--color-cyan) 60deg,
       var(--color-violet) 120deg,
-      transparent 180deg,
-      transparent 360deg
+      color-mix(in oklab, var(--color-line-bright) 80%, transparent) 180deg,
+      color-mix(in oklab, var(--color-line-bright) 80%, transparent) 360deg
     );
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: xor;
-    animation: border-spin 6s linear infinite;
+  }
+
+  .border-orbit.is-in::before {
+    animation: border-spin 2.4s var(--ease-in-out-circ) 2;
+  }
+
+  .border-orbit:hover::before {
+    animation: border-spin 2.4s linear infinite;
   }
 
   .text-gradient {
@@ -436,18 +554,62 @@
     );
   }
 
-  .scan-beam::after {
+  /* Live indicator: a dot with a ring that pings outward (transform only). */
+  .live-dot {
+    position: relative;
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-magenta);
+  }
+
+  .live-dot::after {
     content: "";
     position: absolute;
     inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      to bottom,
-      transparent 40%,
-      color-mix(in oklab, var(--color-cyan) 18%, transparent) 50%,
-      transparent 60%
-    );
-    animation: scan 4.5s linear infinite;
+    border-radius: inherit;
+    background: inherit;
+    opacity: 0;
+  }
+
+  .live-dot.is-live::after,
+  .is-live .live-dot::after {
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Hero scroll cue: a bead of light running down a hairline, on screen only. */
+  .is-live .scroll-cue {
+    animation: scan 1.8s linear infinite;
+  }
+
+  /* Signals along SVG wires: flow forever while visible (.signal), or fire a
+     short burst when a selection changes (.signal--burst). */
+  .signal {
+    stroke-dasharray: 8 112;
+  }
+
+  .is-live .signal {
+    animation: signal 1.4s linear infinite;
+  }
+
+  .signal--burst {
+    stroke-dasharray: none;
+  }
+
+  .is-live .signal--burst {
+    animation: signal-burst 1.6s linear 3;
+  }
+
+  /* Content swapped by a control (tab panels, the research domain panel). */
+  .swap-in {
+    animation: swap-in 0.45s var(--ease-out-expo) both;
+  }
+
+  .sat-in {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pop-in 0.6s var(--ease-out-expo) both;
   }
 
   .glitch {
@@ -459,14 +621,21 @@
     content: attr(data-text);
     position: absolute;
     inset: 0;
+    pointer-events: none;
+    display: none;
   }
 
-  .glitch::before {
+  /* The glitch only runs while its section is on screen. */
+  .is-live .glitch::before,
+  .glitch.is-live::before {
+    display: block;
     color: var(--color-cyan);
     animation: glitch-a 2.4s steps(2) infinite;
   }
 
-  .glitch::after {
+  .is-live .glitch::after,
+  .glitch.is-live::after {
+    display: block;
     color: var(--color-magenta);
     animation: glitch-b 3.1s steps(2) infinite;
   }
@@ -475,38 +644,141 @@
     mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
   }
 
-  .page-enter {
-    animation: page-in 0.7s var(--ease-out-expo) both;
+  /* CSS marquee runs only while on screen; GSAP takes over (data-gsap-on)
+     when it loads and adds scroll-velocity response. */
+  .marquee-track {
+    animation-play-state: paused;
   }
 
-  /* Above-the-fold entrances are CSS-only so first paint never waits on
-     hydration. --d staggers. */
+  .is-live .marquee-track {
+    animation-play-state: running;
+  }
+
+  [data-gsap-on] .marquee-track {
+    animation: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* --- Entrances ---------------------------------------------------------
+     Above the fold: CSS-only, so first paint never waits for JavaScript.
+     --d staggers. Transform + opacity only. */
   .rise {
-    animation: rise 1s var(--ease-out-expo) both;
+    animation: rise 0.8s var(--ease-out-expo) both;
     animation-delay: var(--d, 0ms);
   }
 
-  /* Below-the-fold reveals. Content is visible by default; only when the
-     inline head script has marked the document as scripted do reveals start
-     hidden, so a visitor without JavaScript never sees an empty page. */
-  .js [data-reveal] {
+  /* Below the fold: one IntersectionObserver adds `.is-in`. Content is
+     visible by default; it only starts hidden once the inline head script
+     has marked the document as scripted, so a no-JS visitor sees it all.
+     data-reveal="keep" marks a container that stays put and only cues its
+     children (word masks, odometers, dissolves, bars). */
+  .js [data-reveal]:not([data-reveal="keep"]) {
     opacity: 0;
-    transform: translate3d(0, 26px, 0);
-    filter: blur(6px);
+    transform: translate3d(0, 24px, 0);
     transition:
-      opacity 0.9s var(--ease-out-expo),
-      transform 1.1s var(--ease-out-expo),
-      filter 0.9s var(--ease-out-expo);
+      opacity 0.8s var(--ease-out-expo),
+      transform 1s var(--ease-out-expo);
     transition-delay: var(--d, 0ms);
   }
 
   .js [data-reveal].is-in {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 
-  /* Bars grow from the baseline once their chart is revealed. */
+  /* Pieces of a data-reveal="keep" container that fade up with it. */
+  .js [data-reveal] .fade-up {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition:
+      opacity 0.8s var(--ease-out-expo),
+      transform 1s var(--ease-out-expo);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .js [data-reveal].is-in .fade-up {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* --- Word masks: each word rises out of its own clipping slot ---------- */
+  .wm {
+    display: inline-block;
+    overflow: clip;
+    vertical-align: bottom;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+
+  .wm > span {
+    display: inline-block;
+    transition: transform 1.05s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 55ms + var(--d, 0ms));
+  }
+
+  .js [data-reveal]:not(.is-in) .wm > span {
+    transform: translate3d(0, 110%, 0);
+  }
+
+  .wm-rise > .wm > span {
+    animation: rise-word 0.95s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 70ms + var(--d, 0ms));
+  }
+
+  /* --- Hero headline: per-character spans (see HeroTitle.tsx) ------------ */
+  .ch {
+    display: inline-block;
+    animation: char-in 0.9s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 24ms + 120ms);
+  }
+
+  /* Each character paints its own slice of one gradient, so the colour runs
+     continuously across the word while the letters move independently. */
+  .ch-grad {
+    background: linear-gradient(100deg, var(--color-frost) 10%, var(--color-cyan) 45%, var(--color-violet) 85%);
+    background-size: calc(var(--n) * 100%) 100%;
+    background-position: calc(var(--k) / (var(--n) - 1) * 100%) 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* --- Odometer: each digit is a strip of 0–9 twice, rolled by transform -- */
+  .odo {
+    display: inline-flex;
+    align-items: baseline;
+    user-select: none;
+  }
+
+  .odo-col {
+    display: inline-block;
+    height: 1.15em;
+    line-height: 1.15em;
+    overflow: clip;
+    vertical-align: bottom;
+  }
+
+  .odo-strip {
+    display: block;
+    white-space: pre;
+    line-height: 1.15em;
+    transform: translate3d(0, calc((var(--n) + 10) * -5%), 0);
+    transition: transform 1.9s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  .js [data-reveal]:not(.is-in) .odo-strip {
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* --- Bars that grow from the baseline once revealed -------------------- */
   .js [data-reveal] .bar-grow {
     transform: scaleX(0);
     transform-origin: left;
@@ -518,32 +790,494 @@
     transform: scaleX(1);
   }
 
-  /* Boot sequence: first page of a session only (see the head script). */
-  .boot {
-    animation: boot-out 0.5s var(--ease-out-expo) 1.55s forwards;
+  /* --- Seat map: seats light in a ripple from the centre ---------------- */
+  .js [data-reveal] .seat {
+    opacity: 0.12;
+    transform: scale(0.4);
+    transition:
+      opacity 0.5s var(--ease-out-expo),
+      transform 0.7s var(--ease-out-expo);
+    transition-delay: var(--d, 0ms);
   }
 
-  .boot__line {
+  .js [data-reveal].is-in .seat {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* --- Pixel dissolve: a photo resolves tile by tile --------------------- */
+  .dissolve {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    pointer-events: none;
+  }
+
+  .dissolve > span {
+    background: var(--color-deep);
     opacity: 0;
-    animation: boot-line 0.35s var(--ease-out-expo) forwards;
-    animation-delay: var(--d, 0ms);
   }
 
-  .boot__bar {
+  .js [data-reveal] .dissolve > span {
+    opacity: 1;
+    transition: opacity 0.42s steps(3, end);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .js [data-reveal].is-in .dissolve > span {
+    opacity: 0;
+  }
+
+  .scan-once {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      color-mix(in oklab, var(--color-cyan) 22%, transparent) 50%,
+      transparent 60%
+    );
+    opacity: 0;
+  }
+
+  .is-in .scan-once {
+    animation: scan-once 1.4s var(--ease-out-expo) 0.15s both;
+  }
+
+  /* --- Split-flap digit -------------------------------------------------- */
+  .flap {
+    position: relative;
+    display: inline-block;
+    width: 0.78em;
+    height: 1.2em;
+    line-height: 1.2em;
+    text-align: center;
+    perspective: 220px;
+  }
+
+  .flap > span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--color-raise);
+    backface-visibility: hidden;
+  }
+
+  .flap__top,
+  .flap__fall {
+    top: 0;
+    border-radius: 0.14em 0.14em 0 0;
+    transform-origin: bottom;
+  }
+
+  .flap__bottom,
+  .flap__land {
+    bottom: 0;
+    border-radius: 0 0 0.14em 0.14em;
+    transform-origin: top;
+  }
+
+  .flap__bottom > span,
+  .flap__land > span {
+    display: block;
+    transform: translateY(-50%);
+  }
+
+  .flap__fall {
+    animation: flap-fall 0.32s cubic-bezier(0.55, 0, 0.9, 0.4) both;
+    animation-delay: var(--fd, 0ms);
+  }
+
+  .flap__land {
+    animation: flap-land 0.38s cubic-bezier(0.2, 0.7, 0.3, 1.2) both;
+    animation-delay: calc(var(--fd, 0ms) + 0.3s);
+  }
+
+  .flap::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--color-void);
+  }
+
+  /* --- Route change sweep -------------------------------------------------
+     RouteTransition only renders these on client-side navigations. */
+  .route-wipe {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: -2px;
+    z-index: 70;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--color-cyan), var(--color-violet), transparent);
+    box-shadow: 0 0 24px 4px color-mix(in oklab, var(--color-cyan) 45%, transparent);
+    animation: wipe 0.75s var(--ease-in-out-circ) both;
+  }
+
+  .page-enter {
+    animation: fade-in 0.45s var(--ease-out-expo) both;
+  }
+
+  /* --- Header ------------------------------------------------------------
+     Near-opaque once scrolled; no backdrop blur (blurring a moving page
+     every frame costs more than the rest of the header combined). */
+  .site-header {
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+
+  .site-header[data-scrolled="true"] {
+    background: color-mix(in oklab, var(--color-void) 90%, transparent);
+    border-bottom-color: var(--color-line);
+  }
+
+  .nav-pill,
+  .tab-pill {
+    transition:
+      transform 0.55s var(--ease-out-expo),
+      width 0.55s var(--ease-out-expo),
+      height 0.55s var(--ease-out-expo),
+      opacity 0.3s ease;
+  }
+
+  /* --- Mobile menu (a modal <dialog>) ---------------------------------- */
+  .site-menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: color-mix(in oklab, var(--color-void) 97%, transparent);
+    color: var(--color-frost);
+  }
+
+  .site-menu::backdrop {
+    background: transparent;
+  }
+
+  .site-menu[open] {
+    animation: menu-in 0.7s var(--ease-out-expo) both;
+  }
+
+  .site-menu[open][data-closing] {
+    animation: menu-out 0.42s var(--ease-in-out-circ) both;
+  }
+
+  .site-menu[open] li {
+    animation: slide-in 0.6s var(--ease-out-expo) both;
+    animation-delay: calc(120ms + var(--i, 0) * 45ms);
+  }
+
+  /* --- Command palette (a modal <dialog>) ------------------------------ */
+  .palette {
+    width: min(36rem, calc(100vw - 2rem));
+    max-width: none;
+    margin: 14vh auto auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line-bright);
+    border-radius: 1rem;
+    background: color-mix(in oklab, var(--color-deep) 97%, transparent);
+    color: var(--color-frost);
+    box-shadow: 0 40px 120px -40px color-mix(in oklab, var(--color-cyan) 35%, transparent);
+  }
+
+  .palette::backdrop {
+    background: color-mix(in oklab, var(--color-void) 72%, transparent);
+  }
+
+  .palette[open] {
+    animation: palette-in 0.32s var(--ease-out-expo) both;
+  }
+
+  .palette[open]::backdrop {
+    animation: fade-in 0.2s ease both;
+  }
+
+  /* --- Rails ---------------------------------------------------------- */
+  .rail-controls {
+    display: none;
+  }
+
+  .js .rail-controls {
+    display: flex;
+  }
+
+  /* Cards lean into a throw (--lean is driven by GSAP while dragging). */
+  .rail-track > li {
+    transform: skewX(calc(var(--lean, 0deg) * -1));
+  }
+
+  /* --- Testimonial deck ------------------------------------------------ */
+  .stack__card > figure {
+    box-shadow: 0 -24px 60px -30px color-mix(in oklab, var(--color-void) 90%, transparent);
+  }
+
+  /* The forward-pass HUD only exists in the pinned, horizontal layout. */
+  .hpass__hud {
+    display: none;
+  }
+
+  /* --- Scroll progress hairline ------------------------------------------ */
+  .scroll-progress {
+    transform: scaleX(var(--progress, 0));
     transform-origin: left;
-    animation: boot-bar 1.3s var(--ease-in-out-circ) forwards;
+  }
+}
+
+/* Word masks rising on load (hero titles) use their own keyframes so they
+   can share markup with the reveal-driven version. */
+@keyframes rise-word {
+  from { transform: translate3d(0, 110%, 0); }
+  to { transform: none; }
+}
+
+/* ==========================================================================
+   Scroll-driven choreography — compositor thread, zero JavaScript.
+   Browsers without scroll timelines (and reduced-motion visitors) get the
+   static, fully legible layout; nothing here is needed to read the page.
+   ========================================================================== */
+
+@supports (animation-timeline: view()) {
+  .scroll-progress {
+    transform: scaleX(0);
+    animation: grow-x linear both;
+    animation-timeline: scroll(root block);
   }
 
-  .booted .boot {
-    display: none;
+  @media (prefers-reduced-motion: no-preference) {
+    /* Hero: the headline's characters scatter into the Neural Core as the
+       hero scrolls away; everything else lifts off. */
+    .hero {
+      view-timeline: --hero block;
+    }
+
+    .hero .dz {
+      display: inline-block;
+      animation: disperse linear both;
+      animation-timeline: --hero;
+      animation-range: exit var(--r0, 0%) exit var(--r1, 70%);
+    }
+
+    .hero .lift {
+      animation: lift-away linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 34%;
+    }
+
+    /* Vision: words light up in reading order as the quote crosses the
+       viewport, each with a brief "attention" underline. */
+    .attn-quote {
+      view-timeline: --attn block;
+    }
+
+    .attn {
+      position: relative;
+      opacity: 0.16;
+      animation: attend linear both;
+      animation-timeline: --attn;
+      animation-range: cover var(--r0) cover var(--r1);
+    }
+
+    .attn::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0.25em;
+      bottom: -0.06em;
+      height: 2px;
+      background: var(--color-cyan);
+      transform: scaleX(0);
+      animation: attend-head linear both;
+      animation-timeline: --attn;
+      animation-range: cover var(--r0) cover calc(var(--r1) + 6%);
+    }
+
+    /* Testimonials: sticky cards stack; each recedes as the next arrives. */
+    .stack {
+      view-timeline: --stack block;
+    }
+
+    /* Cards stay opaque (so nothing shows through the deck); an overlay
+       darkens each one as the next arrives. */
+    .stack__card--recede {
+      animation: recede linear both;
+      animation-timeline: --stack;
+      animation-range: contain var(--r0) contain var(--r1);
+      transform-origin: 50% 0;
+    }
+
+    .stack__card--recede::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 22vh;
+      border-radius: 1.25rem;
+      background: var(--color-void);
+      pointer-events: none;
+      opacity: 0;
+      animation: dim linear both;
+      animation-timeline: --stack;
+      animation-range: contain var(--r0) contain var(--r1);
+    }
+
+    /* Events timeline: the spine draws itself as you read down. */
+    .tl-spine {
+      transform-origin: top;
+      animation: grow-y linear both;
+      animation-timeline: view();
+      animation-range: entry 10% exit 50%;
+    }
+
+    /* Building diagram: floors assemble from the ground up. The timeline
+       belongs to the HTML wrapper; SVG children have no box of their own. */
+    .building {
+      view-timeline: --bld block;
+    }
+
+    .floor {
+      animation: floor-in linear both;
+      animation-timeline: --bld;
+      animation-range: entry var(--r0) cover var(--r1);
+    }
+
+    /* Circuit traces between home sections draw on scroll; each junction
+       lights as the line reaches it. */
+    .trace-wrap {
+      view-timeline: --trace block;
+    }
+
+    .trace {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: trace linear both;
+      animation-timeline: --trace;
+      animation-range: entry 0% cover 55%;
+    }
+
+    .trace-node {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: node-pop linear both;
+      animation-timeline: --trace;
+      animation-range: entry var(--at) entry calc(var(--at) + 8%);
+    }
+
+    /* The four-year forward pass: on wide screens the section pins and the
+       years slide past horizontally while the core re-forms. */
+    @media (min-width: 1024px) {
+      .hpass {
+        view-timeline: --hpass block;
+        height: 440vh;
+      }
+
+      .hpass__sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        height: 100svh;
+        overflow: clip;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .hpass__track {
+        display: flex;
+        width: 400%;
+        animation: hpass-slide linear both;
+        animation-timeline: --hpass;
+        animation-range: contain 0% contain 100%;
+      }
+
+      .hpass__panel {
+        flex: none;
+        width: 25%;
+        min-height: 0;
+        padding-block: 0;
+      }
+
+      /* Cards settle as their panel reaches the centre and recede as it
+         leaves; a middle card does both (two animations, one list). */
+      .hpass__card {
+        animation: panel-in linear both;
+        animation-timeline: --hpass;
+        animation-range: contain var(--r0) contain var(--r1);
+      }
+
+      .hpass__card--out {
+        animation: panel-out linear forwards;
+        animation-timeline: --hpass;
+        animation-range: contain var(--r2) contain var(--r3);
+      }
+
+      .hpass__card.hpass__card--out {
+        animation:
+          panel-in linear both,
+          panel-out linear forwards;
+        animation-timeline: --hpass, --hpass;
+        animation-range:
+          contain var(--r0) contain var(--r1),
+          contain var(--r2) contain var(--r3);
+      }
+
+      .hpass__numeral {
+        animation: hpass-parallax linear both;
+        animation-timeline: --hpass;
+        animation-range: contain 0% contain 100%;
+      }
+
+      .hpass__hud {
+        display: flex;
+      }
+
+      .hpass__bar {
+        transform-origin: left;
+        animation: grow-x linear both;
+        animation-timeline: --hpass;
+        animation-range: contain 0% contain 100%;
+      }
+
+      .hpass__index {
+        animation: hpass-index steps(4, jump-none) both;
+        animation-timeline: --hpass;
+        animation-range: contain 0% contain 100%;
+      }
+    }
+  }
+}
+
+/* Without scroll timelines, the scroll-linked pieces fall back to the
+   one-shot reveal used everywhere else. */
+@supports not (animation-timeline: view()) {
+  .js [data-reveal] .floor {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0);
+    transition:
+      opacity 0.7s var(--ease-out-expo),
+      transform 0.9s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 140ms + 150ms);
   }
 
-  .no-scrollbar {
-    scrollbar-width: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  .js [data-reveal].is-in .floor {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -569,18 +1303,32 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 
-  .boot {
-    display: none;
-  }
-
   .js [data-reveal],
-  .js [data-reveal] .bar-grow {
+  .js [data-reveal] .bar-grow,
+  .js [data-reveal] .seat,
+  .js [data-reveal] .fade-up,
+  .js [data-reveal] .floor,
+  .js [data-reveal] .wm > span,
+  .js [data-reveal] .odo-strip {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+
+  .rail-track > li {
+    transform: none;
+  }
+
+  .js [data-reveal] .odo-strip {
+    transform: translate3d(0, calc((var(--n) + 10) * -5%), 0);
+  }
+
+  .js [data-reveal] .dissolve > span {
+    opacity: 0;
   }
 
   .marquee-track {
@@ -588,7 +1336,9 @@
   }
 
   .glitch::before,
-  .glitch::after {
-    display: none;
+  .glitch::after,
+  .live-dot::after,
+  .route-wipe {
+    display: none !important;
   }
 }

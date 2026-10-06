@@ -1,8 +1,9 @@
+import RouteTransition from "@/components/RouteTransition";
+
 /**
- * Re-mounts on every navigation, so its CSS entrance replays as a page
- * transition. CSS rather than Framer Motion: the animation must not wait
- * for hydration, or the page would sit invisible on a slow phone.
+ * Re-mounts on every navigation, so RouteTransition can play its sweep and
+ * fade for client-side page changes (and stay out of the way on first load).
  */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter">{children}</div>;
+  return <RouteTransition>{children}</RouteTransition>;
 }

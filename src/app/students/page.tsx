@@ -9,7 +9,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Students",
   description: `Student life in ${dept.short}, VIT Pune — the AI Students' Forum, hackathons, social-impact work and student patents.`,
-  alternates: { canonical: "/students" },
+  alternates: { canonical: "/students/" },
 };
 
 const beyondCode = achievements.filter((a) => a.title.startsWith("National Defence Academy"));

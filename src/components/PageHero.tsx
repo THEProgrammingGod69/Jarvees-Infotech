@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import NeuralMesh from "@/components/fx/NeuralMesh";
-import Scramble from "@/components/fx/Scramble";
-import { Container } from "@/components/ui";
+import NeuralMesh from "@/components/mesh/NeuralMesh";
+import { Container, delay, Scramble, Words } from "@/components/ui";
 
 /**
- * The opening of every inner page: a terminal-style path, a decoded title
- * and a standfirst over a live neural mesh. Entrances are CSS-only (`.rise`)
- * because this is above the fold and must not wait for hydration.
+ * The opening of every inner page: a terminal-style path that decodes, a
+ * title whose words rise out of their slots, and a standfirst, over a live
+ * neural mesh. Entrances are CSS-only (`.rise`, `.wm-rise`) because this is
+ * above the fold and must never wait for JavaScript.
  */
 export default function PageHero({
   path,
@@ -32,17 +32,19 @@ export default function PageHero({
         <p className="label rise flex items-center gap-2 text-haze">
           <span className="text-violet">~/cse-ai</span>
           <span aria-hidden="true">/</span>
-          <span className="text-cyan">{path}</span>
+          <span className="text-cyan">
+            <Scramble text={path} />
+          </span>
           <span aria-hidden="true" className="caret" />
         </p>
-        <h1 className="rise mt-6 max-w-5xl text-hero text-frost" style={{ ["--d" as string]: "80ms" }}>
-          <Scramble text={title} delay={250} />
+        <h1 className="mt-6 max-w-5xl text-hero text-frost">
+          <Words text={title} rise delayMs={80} />
         </h1>
-        <div className="rise mt-7 max-w-2xl text-body-l text-haze" style={{ ["--d" as string]: "160ms" }}>
+        <div className="rise mt-7 max-w-2xl text-body-l text-haze" style={delay(220)}>
           {intro}
         </div>
         {children && (
-          <div className="rise mt-10" style={{ ["--d" as string]: "240ms" }}>
+          <div className="rise mt-10" style={delay(300)}>
             {children}
           </div>
         )}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import CurriculumExplorer from "@/components/CurriculumExplorer";
 import PageHero from "@/components/PageHero";
+import TrainingRun from "@/components/TrainingRun";
 import { Chip, Container, delay, SectionHead, sectionY } from "@/components/ui";
 import { certifications, finalYearElectives, internshipTracks, modules, pillars, syllabi } from "@/content/curriculum";
 import { dept } from "@/lib/site";
@@ -8,7 +9,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Programme",
   description: `${dept.programme}: the module-by-module curriculum, final-year internship tracks, industry certifications and syllabus downloads.`,
-  alternates: { canonical: "/programme" },
+  alternates: { canonical: "/programme/" },
 };
 
 export default function ProgrammePage() {
@@ -48,11 +49,26 @@ export default function ProgrammePage() {
         </Container>
       </section>
 
+      <section aria-labelledby="training" className={sectionY}>
+        <Container>
+          <SectionHead
+            id="training"
+            index="02"
+            label="Training run"
+            title="How every model learns. Scroll to train one."
+            intro="Start somewhere wrong, measure the loss, step downhill, repeat. Below is a real run of gradient descent with momentum on a loss surface — the path, the checkpoints and every number are computed, not drawn."
+          />
+          <div className="mt-14">
+            <TrainingRun />
+          </div>
+        </Container>
+      </section>
+
       <section aria-labelledby="tracks" className={sectionY}>
         <Container>
           <SectionHead
             id="tracks"
-            index="02"
+            index="03"
             label="Final year"
             title="Two ways to finish."
             intro="In Modules VII and VIII a student either stays on campus for coursework and a major project, or swaps the semester for a 32-hour-a-week internship."
@@ -90,7 +106,7 @@ export default function ProgrammePage() {
 
       <section aria-labelledby="pillars" className={sectionY}>
         <Container>
-          <SectionHead id="pillars" index="03" label="Through-lines" title="What runs through every module." />
+          <SectionHead id="pillars" index="04" label="Through-lines" title="What runs through every module." />
           <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {pillars.map((p, i) => (
               <li key={p.title} data-reveal style={delay(i * 80)}>
@@ -110,7 +126,7 @@ export default function ProgrammePage() {
           <div>
             <SectionHead
               id="certs"
-              index="04"
+              index="05"
               label="Industry certification courses"
               title="IBM, Google, AWS — inside the timetable."
               intro="Multidisciplinary (MD) courses in third year are industry certification tracks."
@@ -126,7 +142,7 @@ export default function ProgrammePage() {
           <div>
             <SectionHead
               id="electives"
-              index="05"
+              index="06"
               label="Final-year electives"
               title="Choose your frontier."
               intro="Multidisciplinary electives offered to final-year students."
@@ -144,7 +160,7 @@ export default function ProgrammePage() {
 
       <section aria-labelledby="downloads" className={sectionY}>
         <Container>
-          <SectionHead id="downloads" index="06" label="Documents" title="Syllabus downloads." intro="Official PDFs, served from vit.edu." />
+          <SectionHead id="downloads" index="07" label="Documents" title="Syllabus downloads." intro="Official PDFs, served from vit.edu." />
           <ul className="mt-12 grid gap-3 md:grid-cols-2">
             {syllabi.map((s, i) => (
               <li key={s.href} data-reveal style={delay((i % 2) * 70)}>

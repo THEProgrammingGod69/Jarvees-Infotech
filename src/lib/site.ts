@@ -7,7 +7,21 @@
  * phone number changed here changes everywhere at once.
  */
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+/**
+ * Canonical origin, used for canonical URLs, the sitemap and structured
+ * data. An explicit NEXT_PUBLIC_SITE_URL always wins (set it to the final
+ * domain). Without it, the production URL each host exposes at build time is
+ * used — Vercel, Netlify, Cloudflare Pages — so a deployment with no
+ * configuration still publishes correct absolute URLs. next.config.ts warns
+ * at build time if none of these is available.
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ??
+  process.env.URL ?? // Netlify
+  process.env.CF_PAGES_URL ?? // Cloudflare Pages
+  "http://localhost:3000"
+).replace(/\/$/, "");
 
 export const dept = {
   name: "Computer Science & Engineering (Artificial Intelligence)",
@@ -29,7 +43,8 @@ export const dept = {
     name: "Prof. Dr. Nilesh P. Sable",
     role: "Professor & Head",
     linkedin: "https://www.linkedin.com/in/nilesh-sable-39633519/",
-    portrait: "https://www.vit.edu/CSE-AI/wp-content/uploads/2025/06/NPS.jpg",
+    /** Self-hosted photo id (src/content/photos.generated.ts). */
+    portrait: "hod",
   },
 } as const;
 

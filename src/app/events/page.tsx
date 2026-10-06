@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import AchievementWall from "@/components/AchievementWall";
-import Countdown from "@/components/fx/Countdown";
+import Countdown from "@/components/Countdown";
 import PageHero from "@/components/PageHero";
 import { Button, Chip, Container, delay, LiveDot, SectionHead, sectionY } from "@/components/ui";
 import { achievements, codeApex3, pastEvents } from "@/content/events";
@@ -9,7 +9,7 @@ import { dept } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Events & achievements",
   description: `${codeApex3.name} — a three-stage hackathon with a ${codeApex3.prizePool} prize pool — plus past hackathons, faculty programmes and student wins from ${dept.short}, VIT Pune.`,
-  alternates: { canonical: "/events" },
+  alternates: { canonical: "/events/" },
 };
 
 export default function EventsPage() {
@@ -35,7 +35,7 @@ export default function EventsPage() {
                 <p className="label flex items-center gap-3 text-magenta">
                   <LiveDot /> Upcoming · registrations close {codeApex3.registerBy}
                 </p>
-                <h2 id="apex" className="glitch mt-6 text-hero text-frost" data-text={codeApex3.name}>
+                <h2 id="apex" data-live className="glitch mt-6 text-hero text-frost" data-text={codeApex3.name}>
                   {codeApex3.name}
                 </h2>
                 <p className="mt-5 font-display text-display-m text-gradient">{codeApex3.tagline}</p>
@@ -62,7 +62,7 @@ export default function EventsPage() {
                 <div>
                   <p className="label text-haze">Countdown to the Grand Finale</p>
                   <div className="mt-4">
-                    <Countdown to={codeApex3.finale} endedLabel="Grand Finale in progress" />
+                    <Countdown to={codeApex3.finale} label={`Time until the ${codeApex3.name} Grand Finale`} endedLabel="Grand Finale in progress" />
                   </div>
                 </div>
                 <div className="rounded-2xl border border-line bg-void/50 p-6">
@@ -72,7 +72,7 @@ export default function EventsPage() {
                     {codeApex3.prizes.map((p) => (
                       <li key={p.place}>
                         <p className="label text-haze">{p.place}</p>
-                        <p className="mt-1 font-display text-heading text-frost">{p.amount}</p>
+                        <p className="mt-1 font-display text-[clamp(0.8rem,3.4vw,1.125rem)] font-semibold whitespace-nowrap text-frost">{p.amount}</p>
                       </li>
                     ))}
                   </ul>
@@ -114,7 +114,8 @@ export default function EventsPage() {
       <section aria-labelledby="timeline" className={sectionY}>
         <Container>
           <SectionHead id="timeline" index="01" label="Past events" title="The log." />
-          <ol className="relative mt-14 space-y-10 before:absolute before:top-2 before:bottom-2 before:left-[7px] before:w-px before:bg-gradient-to-b before:from-cyan before:via-violet before:to-transparent md:before:left-1/2">
+          <ol className="relative mt-14 space-y-10">
+            <li aria-hidden="true" className="tl-spine absolute top-2 bottom-2 left-[7px] w-px bg-gradient-to-b from-cyan via-violet to-transparent md:left-1/2" />
             {[...pastEvents]
               .sort((a, b) => new Date(`1 ${b.date}`).getTime() - new Date(`1 ${a.date}`).getTime())
               .map((e, i) => (

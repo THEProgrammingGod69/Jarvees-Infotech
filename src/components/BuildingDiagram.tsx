@@ -1,8 +1,14 @@
+import { vars } from "@/components/ui";
+
 /**
  * Building 3 as an isometric stack, ground floor to the department's top
  * floor. The department's two floors (second and third) glow. The building's
  * full height was not published, so whatever is above is drawn as a dashed
  * ghost rather than asserted. Ground floor is index 0.
+ *
+ * The floors assemble from the ground up as the diagram scrolls into view
+ * — scroll-driven on the compositor where supported (`.floor`), revealed in
+ * sequence elsewhere — and simply stand there without either.
  */
 export default function BuildingDiagram({ floors = 4, lit = [2, 3] }: { floors?: number; lit?: number[] }) {
   const W = 420;
@@ -13,6 +19,7 @@ export default function BuildingDiagram({ floors = 4, lit = [2, 3] }: { floors?:
   const H = top + floors * slab + 140;
 
   return (
+    <div className="building">
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Building 3: the department occupies the second and third floors">
       <defs>
         <linearGradient id="bd-lit" x1="0" y1="0" x2="1" y2="1">
@@ -25,7 +32,7 @@ export default function BuildingDiagram({ floors = 4, lit = [2, 3] }: { floors?:
         const y = top + (floors - 1 - f) * slab;
         const on = lit.includes(f);
         return (
-          <g key={f} style={{ animation: `rise .9s var(--ease-out-expo) ${(f + 1) * 120}ms both` }}>
+          <g key={f} className="floor" style={vars({ "--i": f, "--r0": `${f * 9}%`, "--r1": `${28 + f * 9}%` })}>
             {/* side walls */}
             <path d={`M30 ${y + 60} L210 ${y + 120} L210 ${y + 120 + slab - 6} L30 ${y + 60 + slab - 6} Z`} className={on ? "fill-cyan/15 stroke-cyan/70" : "fill-deep stroke-line-bright"} strokeWidth={1} />
             <path d={`M390 ${y + 60} L210 ${y + 120} L210 ${y + 120 + slab - 6} L390 ${y + 60 + slab - 6} Z`} className={on ? "fill-violet/15 stroke-violet/70" : "fill-void stroke-line-bright"} strokeWidth={1} />
@@ -42,5 +49,6 @@ export default function BuildingDiagram({ floors = 4, lit = [2, 3] }: { floors?:
       })}
       <path d={plate(top - slab)} fill="none" className="stroke-line-bright" strokeDasharray="3 5" strokeWidth={1} />
     </svg>
+    </div>
   );
 }

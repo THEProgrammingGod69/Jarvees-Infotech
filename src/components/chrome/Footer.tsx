@@ -13,7 +13,7 @@ export default function Footer() {
       <Container className="pt-20 pb-10">
         <div className="grid gap-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <Link href="/" className="group inline-flex items-center gap-3" aria-label="CSE (AI), VIT Pune — home">
+            <Link href="/" className="group inline-flex items-center gap-3" aria-label="CSE·AI — home">
               <Mark className="h-11 w-11" gradientId="mark-footer" />
               <span className="font-display text-display-m text-frost">
                 CSE<span className="text-cyan">·</span>AI
@@ -27,10 +27,10 @@ export default function Footer() {
 
           <nav aria-label="Footer">
             <p className="label text-cyan">Navigate</p>
-            <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2.5 text-small lg:grid-cols-1">
+            <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-1.5 text-small lg:grid-cols-1">
               {nav.map((n) => (
                 <li key={n.href}>
-                  <Link href={n.href} className="text-haze transition-colors hover:text-frost">
+                  <Link href={n.href} className="inline-flex min-h-7 items-center text-haze transition-colors hover:text-frost">
                     {n.label}
                   </Link>
                 </li>
@@ -45,22 +45,25 @@ export default function Footer() {
                 {dept.location},<br />
                 {fullAddress}
               </p>
-              <p>
-                <a href={dept.phone.href} className="transition-colors hover:text-frost">
-                  {dept.phone.display}
-                </a>
-                <br />
-                <a href={`mailto:${dept.email}`} className="transition-colors hover:text-frost">
-                  {dept.email}
-                </a>
-              </p>
+              <ul className="space-y-1">
+                <li>
+                  <a href={dept.phone.href} className="inline-flex min-h-7 items-center transition-colors hover:text-frost">
+                    {dept.phone.display}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${dept.email}`} className="inline-flex min-h-7 items-center transition-colors hover:text-frost">
+                    {dept.email}
+                  </a>
+                </li>
+              </ul>
               <p>{institute.hours}</p>
             </address>
           </div>
 
           <div>
             <p className="label text-cyan">Connect</p>
-            <ul className="mt-5 space-y-2.5 text-small text-haze">
+            <ul className="mt-5 space-y-1.5 text-small text-haze [&_a]:inline-flex [&_a]:min-h-7 [&_a]:items-center">
               <li>
                 <ExtLink href={dept.socials.linkedin}>LinkedIn</ExtLink>
               </li>

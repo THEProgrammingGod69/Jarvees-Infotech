@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 type Domain = { id: string; label: string; items: readonly string[] };
@@ -8,7 +7,9 @@ type Domain = { id: string; label: string; items: readonly string[] };
 /**
  * Research domains as a constellation around the department. Each domain is
  * a focusable node; selecting one fans its evidence out as satellites and
- * lists it in the panel, which is the accessible reading of the same data.
+ * sends a signal down its wire, and the panel beside it — the accessible
+ * reading of the same data — swaps in. The signal only flows while the
+ * diagram is on screen.
  */
 export default function Constellation({ domains }: { domains: readonly Domain[] }) {
   const [active, setActive] = useState(0);
@@ -25,7 +26,7 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
 
   return (
     <div className="grid items-center gap-8 lg:grid-cols-[1.5fr_1fr]">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full overflow-visible" role="group" aria-label="Research domains">
+      <svg viewBox={`0 0 ${W} ${H}`} data-live className="h-auto w-full overflow-visible" role="group" aria-label="Research domains">
         <ellipse cx={cx} cy={cy} rx={290} ry={200} fill="none" className="stroke-line" strokeDasharray="2 6" />
         <ellipse cx={cx} cy={cy} rx={150} ry={100} fill="none" className="stroke-line" strokeDasharray="2 6" />
         {pos.map((q, i) => (
@@ -35,10 +36,8 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
             y1={cy}
             x2={q.x}
             y2={q.y}
-            className={i === active ? "stroke-cyan" : "stroke-line-bright"}
+            className={i === active ? "signal stroke-cyan" : "stroke-line-bright"}
             strokeWidth={i === active ? 1.4 : 0.8}
-            strokeDasharray={i === active ? "8 112" : undefined}
-            style={i === active ? { animation: "signal 1.4s linear infinite" } : undefined}
           />
         ))}
 
@@ -48,7 +47,7 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
           const sx = p.x + Math.cos(p.a + spread) * 70;
           const sy = p.y + Math.sin(p.a + spread) * 70;
           return (
-            <g key={`${current.id}-${k}`} style={{ animation: `rise .6s var(--ease-out-expo) ${k * 80}ms both` }}>
+            <g key={`${current.id}-${k}`} className="sat-in" style={{ animationDelay: `${k * 80}ms` }}>
               <line x1={p.x} y1={p.y} x2={sx} y2={sy} className="stroke-violet" strokeOpacity={0.6} />
               <circle cx={sx} cy={sy} r={5} className="fill-violet" />
             </g>
@@ -74,7 +73,7 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
               aria-pressed={on}
               aria-label={d.label}
               onClick={() => setActive(i)}
-              onMouseEnter={() => setActive(i)}
+              onPointerEnter={(e) => e.pointerType === "mouse" && setActive(i)}
               onFocus={() => setActive(i)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -83,7 +82,6 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
                 }
               }}
               className="cursor-pointer outline-none [&:focus-visible_circle.halo]:stroke-cyan"
-              style={{ animation: `float ${6 + (i % 3)}s ease-in-out ${i * 0.4}s infinite` }}
             >
               <circle cx={q.x} cy={q.y} r={22} className="halo fill-transparent stroke-transparent" strokeWidth={2} />
               <circle cx={q.x} cy={q.y} r={on ? 12 : 8} className={on ? "fill-cyan" : "fill-panel stroke-line-bright"} style={{ transition: "r .4s" }} />
@@ -102,28 +100,20 @@ export default function Constellation({ domains }: { domains: readonly Domain[] 
       </svg>
 
       <div className="holo hud-corners min-h-[18rem] p-7" aria-live="polite">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={current.id}
-            initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <p className="label text-cyan">
-              Domain {String(active + 1).padStart(2, "0")} / {String(domains.length).padStart(2, "0")}
-            </p>
-            <h3 className="mt-4 font-display text-display-m text-frost">{current.label}</h3>
-            <ul className="mt-6 space-y-3">
-              {current.items.map((item) => (
-                <li key={item} className="flex gap-3 text-body text-haze">
-                  <span aria-hidden="true" className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-violet" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </AnimatePresence>
+        <div key={current.id} className="swap-in">
+          <p className="label text-cyan">
+            Domain {String(active + 1).padStart(2, "0")} / {String(domains.length).padStart(2, "0")}
+          </p>
+          <h3 className="mt-4 font-display text-display-m text-frost">{current.label}</h3>
+          <ul className="mt-6 space-y-3">
+            {current.items.map((item) => (
+              <li key={item} className="flex gap-3 text-body text-haze">
+                <span aria-hidden="true" className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-violet" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

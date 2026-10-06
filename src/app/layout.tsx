@@ -1,41 +1,43 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Manrope, Unbounded } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-import BootSequence from "@/components/chrome/BootSequence";
-import CommandPalette from "@/components/chrome/CommandPalette";
 import Footer from "@/components/chrome/Footer";
 import Header from "@/components/chrome/Header";
-import PointerFx from "@/components/fx/PointerFx";
-import RevealObserver from "@/components/fx/RevealObserver";
-import ScrollProgress from "@/components/fx/ScrollProgress";
+import PaletteLauncher from "@/components/chrome/PaletteLauncher";
 import { departmentSchema } from "@/lib/jsonld";
 import { dept, institute, SITE_URL } from "@/lib/site";
+import MotionRuntime from "@/motion/MotionRuntime";
+import PointerFx from "@/motion/PointerFx";
 
 /**
- * Three families, three jobs (see DESIGN.md §3). next/font self-hosts them
- * at build time: no third-party stylesheet on the critical path, no swap
- * shift. Only the body face is preloaded — it carries the hero standfirst.
+ * Three families, three jobs (see DESIGN.md §3). Self-hosted, each as one
+ * small variable WOFF2 subset to exactly the characters the site uses —
+ * rupee sign included (scripts/subset-fonts.py). next/font generates
+ * size-matched fallbacks, so the swap does not shift the layout. Display
+ * and body faces are preloaded (they set the hero); mono labels are not.
  */
-const unbounded = Unbounded({
-  subsets: ["latin"],
+const unbounded = localFont({
+  src: "../fonts/unbounded.woff2",
+  weight: "500 600",
   variable: "--font-unbounded",
   display: "swap",
-  preload: false,
 });
 
-const manrope = Manrope({
-  subsets: ["latin"],
+const manrope = localFont({
+  src: "../fonts/manrope.woff2",
+  weight: "400 700",
   variable: "--font-manrope",
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrains = localFont({
+  src: "../fonts/jetbrains-mono.woff2",
+  weight: "400 500",
   variable: "--font-jetbrains",
   display: "swap",
   preload: false,
+  adjustFontFallback: "Arial",
 });
 
 export const viewport: Viewport = {
@@ -67,12 +69,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Runs before first paint:
- * - `js` lets below-the-fold reveals start hidden only when a script exists
- *   to reveal them again;
- * - `booted` suppresses the boot sequence after the first page of a visit.
+ * Runs before first paint. `js` lets below-the-fold reveals start hidden
+ * only when a script exists to reveal them again, so a visitor without
+ * JavaScript simply sees everything.
  */
-const headScript = `(function(){var d=document.documentElement;d.classList.add('js');try{if(sessionStorage.getItem('cseai-booted'))d.classList.add('booted');else sessionStorage.setItem('cseai-booted','1')}catch(e){}})();`;
+const headScript = `document.documentElement.classList.add("js")`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -85,22 +86,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <BootSequence />
         <div aria-hidden="true" className="atmosphere">
-          <div className="atmosphere__aurora atmosphere__aurora--a" />
-          <div className="atmosphere__aurora atmosphere__aurora--b" />
+          <div className="atmosphere__glow" />
           <div className="atmosphere__grid" />
-          <div className="atmosphere__noise" />
         </div>
-        <ScrollProgress />
+        <div aria-hidden="true" className="scroll-progress fixed inset-x-0 top-0 z-[60] h-px bg-gradient-to-r from-cyan via-violet to-magenta" />
         <Header />
         <main id="main" className="relative z-10">
           {children}
         </main>
         <Footer />
-        <CommandPalette />
+        <PaletteLauncher />
         <PointerFx />
-        <RevealObserver />
+        <MotionRuntime />
       </body>
     </html>
   );
